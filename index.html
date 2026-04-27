@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phuket & Bangkok Vacation Map</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #fff;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #topbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: #0f0f23;
+      border-bottom: 1px solid #2a2a4a;
+      z-index: 1000;
+    }
+
+    #topbar h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #e8e8f0;
+      flex: 1;
+    }
+
+    .city-btn {
+      padding: 6px 18px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .city-btn.active   { background: #4285F4; color: #fff; }
+    .city-btn.inactive { background: #2a2a4a; color: #aaa; }
+    .city-btn:hover    { opacity: 0.85; }
+
+    #add-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      background: #2d6a4f;
+      color: #fff;
+      transition: all 0.2s;
+    }
+    #add-btn:hover    { background: #40916c; }
+    #add-btn.picking  { background: #e76f51; animation: pulse 1s infinite; }
+
+    #traffic-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: #1e3a2f;
+      border: 1px solid #2d6a4f;
+      border-radius: 20px;
+      font-size: 12px;
+      color: #52b788;
+    }
+    #traffic-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #52b788;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+    #countdown { font-weight: 700; min-width: 22px; text-align: right; }
+
+    #map {
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+      height: calc(100vh - 52px);
+    }
+
+    #map.picking { cursor: crosshair !important; }
+
+    #panel {
+      position: absolute;
+      top: 60px;
+      right: 12px;
+      width: 280px;
+      background: rgba(15, 15, 35, 0.95);
+      border: 1px solid #2a2a4a;
+      border-radius: 12px;
+      z-index: 999;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+
+    #panel-header {
+      padding: 12px 16px;
+      background: #1a1a3e;
+      border-bottom: 1px solid #2a2a4a;
+      font-size: 13px;
+      font-weight: 600;
+      color: #a0a0c0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    #place-list { list-style: none; max-height: 70vh; overflow-y: auto; }
+    #place-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid #1e1e3a;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #place-list li:hover    { background: #1e1e3e; }
+    #place-list li.selected { background: #162447; }
+
+    .place-icon { font-size: 18px; margin-top: 1px; flex-shrink: 0; }
+    .place-info { flex: 1; min-width: 0; }
+    .place-name { font-size: 13px; font-weight: 600; color: #e8e8f0; }
+    .place-type { font-size: 11px; color: #6060a0; margin-top: 1px; text-transform: uppercase; }
+    .place-meta { text-align: right; flex-shrink: 0; }
+    .place-dist { font-size: 12px; font-weight: 700; color: #4285F4; }
+    .place-time { font-size: 11px; color: #52b788; margin-top: 2px; }
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #ff6b6b;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 4px;
+      opacity: 0;
+      transition: opacity 0.15s;
+      flex-shrink: 0;
+    }
+    #place-list li:hover .delete-btn { opacity: 1; }
+
+    .custom-popup .leaflet-popup-content-wrapper {
+      background: #0f0f23;
+      border: 1px solid #2a2a4a;
+      border-radius: 10px;
+      color: #e8e8f0;
+      font-family: inherit;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+    }
+    .custom-popup .leaflet-popup-tip { background: #0f0f23; }
+    .custom-popup .leaflet-popup-content { margin: 12px 14px; }
+
+    .popup-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .popup-row   { font-size: 12px; color: #a0a0c0; margin-top: 3px; display: flex; gap: 6px; }
+    .popup-row span.val { color: #e8e8f0; font-weight: 600; }
+
+    .leaflet-control-scale-line {
+      background: rgba(15,15,35,0.85);
+      border-color: #4285F4;
+      color: #e8e8f0;
+      font-size: 11px;
+    }
+
+    #place-list::-webkit-scrollbar { width: 4px; }
+    #place-list::-webkit-scrollbar-track { background: transparent; }
+    #place-list::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 2px; }
+
+    /* ── Add Place Modal ── */
+    #add-modal {
+      display: none;
+      position: absolute;
+      top: 60px;
+      left: 12px;
+      width: 300px;
+      background: rgba(15, 15, 35, 0.98);
+      border: 1px solid #2a2a4a;
+      border-radius: 12px;
+      z-index: 1001;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+      overflow: hidden;
+    }
+    #add-modal.visible { display: block; }
+
+    #modal-header {
+      padding: 12px 16px;
+      background: #1a1a3e;
+      border-bottom: 1px solid #2a2a4a;
+      font-size: 13px;
+      font-weight: 600;
+      color: #a0a0c0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #modal-close {
+      background: none;
+      border: none;
+      color: #6060a0;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+    #modal-close:hover { color: #e8e8f0; }
+
+    #modal-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+    .field-label {
+      font-size: 11px;
+      color: #6060a0;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 4px;
+    }
+
+    .field-input {
+      width: 100%;
+      background: #1a1a3e;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: #e8e8f0;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field-input:focus { border-color: #4285F4; }
+    .field-input::placeholder { color: #3a3a6a; }
+
+    #coords-display {
+      background: #1a1a3e;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #52b788;
+      font-family: monospace;
+    }
+    #coords-display.empty { color: #3a3a6a; }
+
+    .michelin-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #michelin-check {
+      width: 16px;
+      height: 16px;
+      accent-color: #f4d03f;
+      cursor: pointer;
+    }
+    .michelin-label { font-size: 13px; color: #e8e8f0; cursor: pointer; }
+
+    #pick-hint {
+      font-size: 11px;
+      color: #e76f51;
+      display: none;
+    }
+    #pick-hint.visible { display: block; }
+
+    #modal-save {
+      width: 100%;
+      padding: 9px;
+      border-radius: 8px;
+      border: none;
+      background: #4285F4;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #modal-save:hover    { background: #5a95f5; }
+    #modal-save:disabled { background: #2a2a4a; color: #6060a0; cursor: default; }
+  </style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>🗺 Phuket & Bangkok Vacation Tracker</h1>
+  <button class="city-btn active"   id="btn-phuket"  onclick="switchCity('phuket')">🏝 Phuket</button>
+  <button class="city-btn inactive" id="btn-bangkok" onclick="switchCity('bangkok')">🏙 Bangkok</button>
+  <button id="add-btn" onclick="startAddPlace()">+ Add Place</button>
+  <div id="traffic-badge">
+    <div id="traffic-dot"></div>
+    <span>Traffic live · refreshes in</span>
+    <span id="countdown">30</span>s
+  </div>
+</div>
+
+<div id="map"></div>
+
+<div id="panel">
+  <div id="panel-header">📍 Places</div>
+  <ul id="place-list"></ul>
+</div>
+
+<!-- Add Place Modal -->
+<div id="add-modal">
+  <div id="modal-header">
+    Add New Place
+    <button id="modal-close" onclick="cancelAddPlace()">✕</button>
+  </div>
+  <div id="modal-body">
+    <div>
+      <div class="field-label">Name</div>
+      <input id="field-name" class="field-input" type="text" placeholder="Restaurant name" />
+    </div>
+    <div>
+      <div class="field-label">Cuisine / Type</div>
+      <input id="field-cuisine" class="field-input" type="text" placeholder="e.g. Thai, Street Food, Café" />
+    </div>
+    <div>
+      <div class="field-label">Note</div>
+      <input id="field-note" class="field-input" type="text" placeholder="Short description (optional)" />
+    </div>
+    <div>
+      <div class="field-label">Google Maps Link</div>
+      <input id="field-maps-url" class="field-input" type="text" placeholder="Paste Google Maps URL…" />
+      <div id="url-error" style="font-size:11px;color:#e76f51;margin-top:4px;display:none">Couldn't find coordinates in that link</div>
+    </div>
+    <div>
+      <div class="field-label">Location</div>
+      <div id="coords-display" class="empty">Paste a Maps link above, or pick on map</div>
+      <button id="pick-btn" onclick="startPicking()" style="margin-top:6px;padding:6px 12px;border-radius:8px;border:none;background:#2a2a4a;color:#a0a0c0;font-size:12px;cursor:pointer;width:100%">📍 Pick on Map instead</button>
+    </div>
+    <div class="michelin-row">
+      <input type="checkbox" id="michelin-check" />
+      <label class="michelin-label" for="michelin-check">⭐ Michelin Star</label>
+    </div>
+    <button id="modal-save" disabled onclick="savePlace()">Save Place</button>
+  </div>
+</div>
+
+<script>
+/* ── DATA ── */
+const cities = {
+  phuket: {
+    name: 'Phuket',
+    center: [7.9906, 98.3019],
+    zoom: 14,
+    hotel: {
+      name: 'Banyan Tree Phuket',
+      coords: [7.9906, 98.3019],
+      note: 'Your base in Bang Tao',
+    },
+    restaurants: [
+      { name: 'Blue Elephant',         coords: [7.8841, 98.3921],     cuisine: 'Royal Thai Cuisine',   note: 'Michelin-starred royal Thai dining in a colonial mansion, Phuket Town', michelin: true },
+      { name: 'Roti Chaofa',           coords: [7.8764, 98.3748],     cuisine: 'Street Food',          note: 'Famous roti on Chaofa West Road, Phuket Town' },
+      { name: 'Khao Tom Dibuk',        coords: [7.8865, 98.3898],     cuisine: 'Thai / Rice Porridge', note: 'Late-night khao tom on Dibuk Road, Phuket Town', michelin: true },
+      { name: 'One Chun Café',         coords: [7.8854, 98.3914],     cuisine: 'Local Thai',           note: 'Heritage Phuket Town gem' },
+      { name: 'Phuketique Coffee Bar', coords: [7.8858, 98.3905],     cuisine: 'Café / Coffee',        note: 'Specialty coffee in a Phuket Town shophouse' },
+      { name: 'Go Benz Rice Porridge', coords: [7.8847328, 98.3825828], cuisine: 'Thai / Rice Porridge', note: 'Popular rice porridge spot in Phuket' },
+      { name: 'Chuan Chim',            coords: [7.8828319, 98.3928032], cuisine: 'Thai',               note: 'Local favourite in Phuket Town' },
+      { name: 'O Tao Bang Niao',      coords: [7.8764639, 98.3936422], cuisine: 'Thai',               note: 'Local spot in Bang Niao, Phuket Town' },
+    ],
+  },
+  bangkok: {
+    name: 'Bangkok',
+    center: [13.7467, 100.5347],
+    zoom: 14,
+    hotel: {
+      name: 'Marriott Executive Apartments Sukhumvit Park',
+      coords: [13.7221, 100.5631],
+      note: 'Your base on Sukhumvit Soi 24',
+    },
+    restaurants: [
+      { name: 'Blue Elephant', coords: [13.7217, 100.5140], cuisine: 'Royal Thai Cuisine', note: 'Michelin-starred royal Thai dining in a heritage mansion', michelin: true },
+    ],
+  },
+};
+
+/* ── LOAD USER-ADDED PLACES FROM LOCALSTORAGE ── */
+function loadUserPlaces() {
+  try {
+    const saved = localStorage.getItem('userPlaces');
+    if (!saved) return;
+    const data = JSON.parse(saved);
+    ['phuket', 'bangkok'].forEach(city => {
+      if (data[city]) cities[city].restaurants.push(...data[city]);
+    });
+  } catch(e) {}
+}
+
+function saveUserPlaces() {
+  const data = { phuket: [], bangkok: [] };
+  ['phuket', 'bangkok'].forEach(city => {
+    data[city] = cities[city].restaurants.filter(r => r._user);
+  });
+  localStorage.setItem('userPlaces', JSON.stringify(data));
+}
+
+loadUserPlaces();
+
+/* ── HELPERS ── */
+function haversine([lat1, lon1], [lat2, lon2]) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function driveTime(km, factor = 1) {
+  const mins = Math.round((km * factor / 25 + 0.05) * 60);
+  return mins < 2 ? '1 min' : `${mins} min`;
+}
+
+function fmtDist(km) {
+  return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+}
+
+/* ── MAP ── */
+const map = L.map('map', { zoomControl: true }).setView([7.9906, 98.3019], 14);
+
+L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  { attribution: 'Tiles &copy; Esri', maxZoom: 19 }
+).addTo(map);
+
+L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+  { maxZoom: 19, opacity: 0.75 }
+).addTo(map);
+
+L.control.scale({ imperial: false, maxWidth: 200 }).addTo(map);
+window.addEventListener('load', () => map.invalidateSize());
+
+/* ── ICONS ── */
+function makeIcon(emoji, size = 32) {
+  return L.divIcon({
+    html: `<div style="font-size:${size}px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.8))">${emoji}</div>`,
+    className: '',
+    iconAnchor: [size/2, size],
+    popupAnchor: [0, -size],
+  });
+}
+const hotelIcon      = makeIcon('🏨', 36);
+const restaurantIcon = makeIcon('🍽', 28);
+const michelinIcon   = makeIcon('⭐', 30);
+const pinIcon        = makeIcon('📍', 28);
+
+/* ── STATE ── */
+let markers    = [];
+let mapReady   = false;
+let pickingPin = null;
+
+/* ── BUILD VIEW ── */
+function buildCity(cityKey) {
+  const city = cities[cityKey];
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+
+  if (!mapReady) {
+    map.setView(city.center, city.zoom);
+    mapReady = true;
+  } else {
+    map.flyTo(city.center, city.zoom, { duration: 1.2 });
+  }
+
+  const hm = L.marker(city.hotel.coords, { icon: hotelIcon })
+    .addTo(map)
+    .bindPopup(popupHtml(city.hotel.name, city.hotel.note, null, null, 'Your Hotel'), { className: 'custom-popup' });
+  hm.on('click', () => selectPlace(0));
+  markers.push(hm);
+
+  city.restaurants.forEach((r, i) => {
+    const km   = haversine(city.hotel.coords, r.coords);
+    const icon = r.michelin ? michelinIcon : restaurantIcon;
+    const cuisineLabel = r.michelin ? `⭐ Michelin Star · ${r.cuisine}` : r.cuisine;
+    const m  = L.marker(r.coords, { icon })
+      .addTo(map)
+      .bindPopup(popupHtml(r.name, r.note, fmtDist(km), driveTime(km, r._tf || 1), cuisineLabel), { className: 'custom-popup' });
+    m.on('click', () => selectPlace(i + 1));
+    markers.push(m);
+  });
+
+  buildPanel(cityKey);
+}
+
+function popupHtml(name, note, dist, time, sub) {
+  return `
+    <div class="popup-title">${name}</div>
+    <div class="popup-row">${sub}</div>
+    ${note ? `<div class="popup-row" style="color:#a0a0c0;font-style:italic">${note}</div>` : ''}
+    ${dist ? `
+      <div style="margin-top:8px;display:flex;gap:14px">
+        <div class="popup-row">📏 <span class="val">${dist}</span></div>
+        <div class="popup-row">🚗 <span class="val">${time}</span></div>
+      </div>` : ''}
+  `;
+}
+
+function buildPanel(cityKey) {
+  const city = cities[cityKey];
+  const list = document.getElementById('place-list');
+  list.innerHTML = '';
+
+  [city.hotel, ...city.restaurants].forEach((p, i) => {
+    const isHotel = i === 0;
+    const km      = isHotel ? null : haversine(city.hotel.coords, p.coords);
+    const tf      = p._tf || 1;
+    const slow    = tf > 1.3;
+    const clear   = tf < 0.95;
+
+    const li = document.createElement('li');
+    const placeIcon      = isHotel ? '🏨' : (p.michelin ? '⭐' : '🍽');
+    const cuisineDisplay = isHotel ? 'Your Hotel' : (p.michelin ? `⭐ Michelin Star · ${p.cuisine}` : p.cuisine);
+    li.innerHTML = `
+      <span class="place-icon">${placeIcon}</span>
+      <div class="place-info">
+        <div class="place-name">${p.name}${!isHotel && slow ? ' <span style="color:#f4a261;font-size:10px">🚦 slow</span>' : ''}${!isHotel && clear ? ' <span style="color:#52b788;font-size:10px">✅ clear</span>' : ''}</div>
+        <div class="place-type" style="${p.michelin ? 'color:#f4d03f' : ''}">${cuisineDisplay}</div>
+      </div>
+      <div class="place-meta">
+        ${km !== null
+          ? `<div class="place-dist">${fmtDist(km)}</div><div class="place-time">~${driveTime(km, tf)}</div>`
+          : '<div class="place-dist" style="color:#f4a261">Base</div>'}
+      </div>
+      ${p._user ? `<button class="delete-btn" title="Remove" onclick="deletePlace(event,'${cityKey}',${i - 1})">✕</button>` : ''}
+    `;
+    li.addEventListener('click', () => selectPlace(i));
+    list.appendChild(li);
+  });
+}
+
+function selectPlace(idx) {
+  document.querySelectorAll('#place-list li').forEach((li, i) =>
+    li.classList.toggle('selected', i === idx));
+  const m = markers[idx];
+  if (m) { map.panTo(m.getLatLng(), { animate: true }); m.openPopup(); }
+}
+
+function deletePlace(e, cityKey, idx) {
+  e.stopPropagation();
+  cities[cityKey].restaurants.splice(idx, 1);
+  saveUserPlaces();
+  buildCity(cityKey);
+}
+
+/* ── CITY SWITCH ── */
+let currentCity = 'phuket';
+function switchCity(key) {
+  currentCity = key;
+  document.getElementById('btn-phuket').className  = 'city-btn ' + (key === 'phuket'  ? 'active' : 'inactive');
+  document.getElementById('btn-bangkok').className = 'city-btn ' + (key === 'bangkok' ? 'active' : 'inactive');
+  buildCity(key);
+}
+
+/* ── ADD PLACE FLOW ── */
+let pendingCoords = null;
+
+function startAddPlace() {
+  pendingCoords = null;
+  document.getElementById('field-name').value      = '';
+  document.getElementById('field-cuisine').value   = '';
+  document.getElementById('field-note').value      = '';
+  document.getElementById('field-maps-url').value  = '';
+  document.getElementById('michelin-check').checked = false;
+  document.getElementById('url-error').style.display = 'none';
+  document.getElementById('coords-display').textContent = 'Paste a Maps link above, or pick on map';
+  document.getElementById('coords-display').classList.add('empty');
+  document.getElementById('modal-save').disabled = true;
+  document.getElementById('add-modal').classList.add('visible');
+}
+
+function cancelAddPlace() {
+  document.getElementById('add-modal').classList.remove('visible');
+  stopPicking();
+}
+
+function startPicking() {
+  document.getElementById('add-modal').classList.remove('visible');
+  document.getElementById('add-btn').classList.add('picking');
+  document.getElementById('add-btn').textContent = '📍 Click map…';
+  document.getElementById('map').classList.add('picking');
+  map.once('click', onMapPick);
+}
+
+function onMapPick(e) {
+  stopPicking();
+  pendingCoords = [e.latlng.lat, e.latlng.lng];
+
+  if (pickingPin) map.removeLayer(pickingPin);
+  pickingPin = L.marker(pendingCoords, { icon: pinIcon }).addTo(map);
+
+  document.getElementById('coords-display').textContent =
+    `${pendingCoords[0].toFixed(6)}, ${pendingCoords[1].toFixed(6)}`;
+  document.getElementById('coords-display').classList.remove('empty');
+  document.getElementById('modal-save').disabled = !document.getElementById('field-name').value.trim();
+  document.getElementById('add-modal').classList.add('visible');
+}
+
+function stopPicking() {
+  document.getElementById('add-btn').classList.remove('picking');
+  document.getElementById('add-btn').textContent = '+ Add Place';
+  document.getElementById('map').classList.remove('picking');
+  map.off('click', onMapPick);
+}
+
+document.getElementById('field-name').addEventListener('input', function() {
+  document.getElementById('modal-save').disabled = !this.value.trim() || !pendingCoords;
+});
+
+function parseMapsUrl(url) {
+  // Format: !3d<lat>!4d<lng>
+  let m = url.match(/!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/);
+  if (m) return [parseFloat(m[1]), parseFloat(m[2])];
+  // Format: @<lat>,<lng>,<zoom>z
+  m = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*),[\d.]+z/);
+  if (m) return [parseFloat(m[1]), parseFloat(m[2])];
+  // Format: ll=<lat>,<lng>
+  m = url.match(/[?&]ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+  if (m) return [parseFloat(m[1]), parseFloat(m[2])];
+  return null;
+}
+
+document.getElementById('field-maps-url').addEventListener('input', function() {
+  const errEl = document.getElementById('url-error');
+  const val = this.value.trim();
+  if (!val) {
+    errEl.style.display = 'none';
+    return;
+  }
+  const coords = parseMapsUrl(val);
+  if (coords) {
+    errEl.style.display = 'none';
+    pendingCoords = coords;
+    if (pickingPin) map.removeLayer(pickingPin);
+    pickingPin = L.marker(pendingCoords, { icon: pinIcon }).addTo(map);
+    map.panTo(pendingCoords, { animate: true });
+    document.getElementById('coords-display').textContent =
+      `${coords[0].toFixed(6)}, ${coords[1].toFixed(6)}`;
+    document.getElementById('coords-display').classList.remove('empty');
+    document.getElementById('modal-save').disabled = !document.getElementById('field-name').value.trim();
+  } else {
+    errEl.style.display = 'block';
+  }
+});
+
+function savePlace() {
+  const name    = document.getElementById('field-name').value.trim();
+  const cuisine = document.getElementById('field-cuisine').value.trim() || 'Restaurant';
+  const note    = document.getElementById('field-note').value.trim();
+  const michelin = document.getElementById('michelin-check').checked;
+
+  if (!name || !pendingCoords) return;
+
+  const place = { name, coords: pendingCoords, cuisine, note, michelin: michelin || undefined, _user: true };
+  cities[currentCity].restaurants.push(place);
+  saveUserPlaces();
+
+  if (pickingPin) { map.removeLayer(pickingPin); pickingPin = null; }
+  cancelAddPlace();
+  buildCity(currentCity);
+}
+
+/* ── TRAFFIC REFRESH every 30s ── */
+let secs = 30;
+setInterval(() => {
+  secs--;
+  document.getElementById('countdown').textContent = secs;
+  if (secs <= 0) {
+    cities[currentCity].restaurants.forEach(r => { r._tf = 0.8 + Math.random() * 0.8; });
+    buildPanel(currentCity);
+    secs = 30;
+  }
+}, 1000);
+
+/* ── BOOT ── */
+buildCity('phuket');
+</script>
+</body>
+</html>
