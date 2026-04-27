@@ -20,10 +20,7 @@
       overflow: hidden;
     }
 
-    body {
-      display: flex;
-      flex-direction: column;
-    }
+    body { display: flex; flex-direction: column; }
 
     #topbar {
       display: flex;
@@ -35,12 +32,7 @@
       z-index: 1000;
     }
 
-    #topbar h1 {
-      font-size: 16px;
-      font-weight: 600;
-      color: #e8e8f0;
-      flex: 1;
-    }
+    #topbar h1 { font-size: 16px; font-weight: 600; color: #e8e8f0; flex: 1; }
 
     .city-btn {
       padding: 6px 18px;
@@ -66,8 +58,8 @@
       color: #fff;
       transition: all 0.2s;
     }
-    #add-btn:hover    { background: #40916c; }
-    #add-btn.picking  { background: #e76f51; animation: pulse 1s infinite; }
+    #add-btn:hover   { background: #40916c; }
+    #add-btn.picking { background: #e76f51; animation: pulse 1s infinite; }
 
     #traffic-badge {
       display: flex;
@@ -98,14 +90,14 @@
       min-height: 0;
       height: calc(100vh - 52px);
     }
-
     #map.picking { cursor: crosshair !important; }
 
+    /* ── Side Panel ── */
     #panel {
       position: absolute;
       top: 60px;
       right: 12px;
-      width: 280px;
+      width: 285px;
       background: rgba(15, 15, 35, 0.95);
       border: 1px solid #2a2a4a;
       border-radius: 12px;
@@ -125,8 +117,24 @@
       letter-spacing: 0.5px;
     }
 
-    #place-list { list-style: none; max-height: 70vh; overflow-y: auto; }
-    #place-list li {
+    #panel-scroll { max-height: 70vh; overflow-y: auto; }
+
+    .section-header {
+      padding: 7px 14px;
+      background: #12122a;
+      font-size: 10px;
+      font-weight: 700;
+      color: #5050a0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid #1e1e3a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .place-list { list-style: none; }
+    .place-list li {
       display: flex;
       align-items: flex-start;
       gap: 10px;
@@ -135,8 +143,8 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    #place-list li:hover    { background: #1e1e3e; }
-    #place-list li.selected { background: #162447; }
+    .place-list li:hover    { background: #1e1e3e; }
+    .place-list li.selected { background: #162447; }
 
     .place-icon { font-size: 18px; margin-top: 1px; flex-shrink: 0; }
     .place-info { flex: 1; min-width: 0; }
@@ -145,6 +153,7 @@
     .place-meta { text-align: right; flex-shrink: 0; }
     .place-dist { font-size: 12px; font-weight: 700; color: #4285F4; }
     .place-time { font-size: 11px; color: #52b788; margin-top: 2px; }
+
     .delete-btn {
       background: none;
       border: none;
@@ -156,7 +165,7 @@
       transition: opacity 0.15s;
       flex-shrink: 0;
     }
-    #place-list li:hover .delete-btn { opacity: 1; }
+    .place-list li:hover .delete-btn { opacity: 1; }
 
     .custom-popup .leaflet-popup-content-wrapper {
       background: #0f0f23;
@@ -180,9 +189,9 @@
       font-size: 11px;
     }
 
-    #place-list::-webkit-scrollbar { width: 4px; }
-    #place-list::-webkit-scrollbar-track { background: transparent; }
-    #place-list::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 2px; }
+    #panel-scroll::-webkit-scrollbar { width: 4px; }
+    #panel-scroll::-webkit-scrollbar-track { background: transparent; }
+    #panel-scroll::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 2px; }
 
     /* ── Add Place Modal ── */
     #add-modal {
@@ -248,6 +257,27 @@
     .field-input:focus { border-color: #4285F4; }
     .field-input::placeholder { color: #3a3a6a; }
 
+    /* Type toggle */
+    .type-toggle {
+      display: flex;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .type-toggle button {
+      flex: 1;
+      padding: 7px 0;
+      background: #1a1a3e;
+      border: none;
+      color: #6060a0;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .type-toggle button.active { background: #4285F4; color: #fff; }
+    .type-toggle button:first-child { border-right: 1px solid #2a2a4a; }
+
     #coords-display {
       background: #1a1a3e;
       border: 1px solid #2a2a4a;
@@ -265,19 +295,11 @@
       gap: 10px;
     }
     #michelin-check {
-      width: 16px;
-      height: 16px;
+      width: 16px; height: 16px;
       accent-color: #f4d03f;
       cursor: pointer;
     }
     .michelin-label { font-size: 13px; color: #e8e8f0; cursor: pointer; }
-
-    #pick-hint {
-      font-size: 11px;
-      color: #e76f51;
-      display: none;
-    }
-    #pick-hint.visible { display: block; }
 
     #modal-save {
       width: 100%;
@@ -313,7 +335,17 @@
 
 <div id="panel">
   <div id="panel-header">📍 Places</div>
-  <ul id="place-list"></ul>
+  <div id="panel-scroll">
+    <!-- Hotel -->
+    <div class="section-header">🏨 Hotel</div>
+    <ul class="place-list" id="list-hotel"></ul>
+    <!-- Restaurants -->
+    <div class="section-header">🍽 Restaurants</div>
+    <ul class="place-list" id="list-restaurants"></ul>
+    <!-- Attractions -->
+    <div class="section-header">🏛 Tourist Attractions</div>
+    <ul class="place-list" id="list-attractions"></ul>
+  </div>
 </div>
 
 <!-- Add Place Modal -->
@@ -324,11 +356,18 @@
   </div>
   <div id="modal-body">
     <div>
-      <div class="field-label">Name</div>
-      <input id="field-name" class="field-input" type="text" placeholder="Restaurant name" />
+      <div class="field-label">Type</div>
+      <div class="type-toggle">
+        <button id="type-restaurant" class="active" onclick="setType('restaurant')">🍽 Restaurant</button>
+        <button id="type-attraction"             onclick="setType('attraction')">🏛 Attraction</button>
+      </div>
     </div>
     <div>
-      <div class="field-label">Cuisine / Type</div>
+      <div class="field-label">Name</div>
+      <input id="field-name" class="field-input" type="text" placeholder="Place name" />
+    </div>
+    <div>
+      <div class="field-label" id="label-cuisine">Cuisine / Type</div>
       <input id="field-cuisine" class="field-input" type="text" placeholder="e.g. Thai, Street Food, Café" />
     </div>
     <div>
@@ -343,9 +382,9 @@
     <div>
       <div class="field-label">Location</div>
       <div id="coords-display" class="empty">Paste a Maps link above, or pick on map</div>
-      <button id="pick-btn" onclick="startPicking()" style="margin-top:6px;padding:6px 12px;border-radius:8px;border:none;background:#2a2a4a;color:#a0a0c0;font-size:12px;cursor:pointer;width:100%">📍 Pick on Map instead</button>
+      <button onclick="startPicking()" style="margin-top:6px;padding:6px 12px;border-radius:8px;border:none;background:#2a2a4a;color:#a0a0c0;font-size:12px;cursor:pointer;width:100%">📍 Pick on Map instead</button>
     </div>
-    <div class="michelin-row">
+    <div class="michelin-row" id="michelin-row">
       <input type="checkbox" id="michelin-check" />
       <label class="michelin-label" for="michelin-check">⭐ Michelin Star</label>
     </div>
@@ -366,14 +405,21 @@ const cities = {
       note: 'Your base in Bang Tao',
     },
     restaurants: [
-      { name: 'Blue Elephant',         coords: [7.8841, 98.3921],     cuisine: 'Royal Thai Cuisine',   note: 'Michelin-starred royal Thai dining in a colonial mansion, Phuket Town', michelin: true },
-      { name: 'Roti Chaofa',           coords: [7.8764, 98.3748],     cuisine: 'Street Food',          note: 'Famous roti on Chaofa West Road, Phuket Town' },
-      { name: 'Khao Tom Dibuk',        coords: [7.8865, 98.3898],     cuisine: 'Thai / Rice Porridge', note: 'Late-night khao tom on Dibuk Road, Phuket Town', michelin: true },
-      { name: 'One Chun Café',         coords: [7.8854, 98.3914],     cuisine: 'Local Thai',           note: 'Heritage Phuket Town gem' },
-      { name: 'Phuketique Coffee Bar', coords: [7.8858, 98.3905],     cuisine: 'Café / Coffee',        note: 'Specialty coffee in a Phuket Town shophouse' },
+      { name: 'Blue Elephant',         coords: [7.8841, 98.3921],       cuisine: 'Royal Thai Cuisine',   note: 'Michelin-starred royal Thai dining in a colonial mansion, Phuket Town', michelin: true },
+      { name: 'Roti Chaofa',           coords: [7.8764, 98.3748],       cuisine: 'Street Food',          note: 'Famous roti on Chaofa West Road, Phuket Town' },
+      { name: 'Khao Tom Dibuk',        coords: [7.8865, 98.3898],       cuisine: 'Thai / Rice Porridge', note: 'Late-night khao tom on Dibuk Road, Phuket Town', michelin: true },
+      { name: 'One Chun Café',         coords: [7.8854, 98.3914],       cuisine: 'Local Thai',           note: 'Heritage Phuket Town gem' },
+      { name: 'Phuketique Coffee Bar', coords: [7.8858, 98.3905],       cuisine: 'Café / Coffee',        note: 'Specialty coffee in a Phuket Town shophouse' },
       { name: 'Go Benz Rice Porridge', coords: [7.8847328, 98.3825828], cuisine: 'Thai / Rice Porridge', note: 'Popular rice porridge spot in Phuket' },
-      { name: 'Chuan Chim',            coords: [7.8828319, 98.3928032], cuisine: 'Thai',               note: 'Local favourite in Phuket Town' },
-      { name: 'O Tao Bang Niao',      coords: [7.8764639, 98.3936422], cuisine: 'Thai',               note: 'Local spot in Bang Niao, Phuket Town' },
+      { name: 'Chuan Chim',            coords: [7.8828319, 98.3928032], cuisine: 'Thai',                 note: 'Local favourite in Phuket Town' },
+      { name: 'O Tao Bang Niao',       coords: [7.8764639, 98.3936422], cuisine: 'Thai',                 note: 'Local spot in Bang Niao, Phuket Town' },
+    ],
+    attractions: [
+      { name: 'Big Buddha',       coords: [7.8274, 98.3094], type: 'Landmark',   note: 'Giant white marble Buddha, panoramic views' },
+      { name: 'Wat Chalong',      coords: [7.8452, 98.3367], type: 'Temple',     note: 'Most important Buddhist temple in Phuket' },
+      { name: 'Old Phuket Town',  coords: [7.8854, 98.3914], type: 'Heritage',   note: 'Sino-Portuguese shophouses & street art' },
+      { name: 'Promthep Cape',    coords: [7.7697, 98.3025], type: 'Viewpoint',  note: 'Famous sunset viewpoint at southern tip' },
+      { name: 'Patong Beach',     coords: [7.8962, 98.2980], type: 'Beach',      note: 'Phuket\'s most popular beach' },
     ],
   },
   bangkok: {
@@ -388,27 +434,38 @@ const cities = {
     restaurants: [
       { name: 'Blue Elephant', coords: [13.7217, 100.5140], cuisine: 'Royal Thai Cuisine', note: 'Michelin-starred royal Thai dining in a heritage mansion', michelin: true },
     ],
+    attractions: [
+      { name: 'Grand Palace',       coords: [13.7500, 100.4913], type: 'Historic Site', note: 'Iconic royal palace complex & Wat Phra Kaew' },
+      { name: 'Wat Pho',            coords: [13.7465, 100.4927], type: 'Temple',        note: 'Home of the giant Reclining Buddha' },
+      { name: 'Wat Arun',           coords: [13.7437, 100.4888], type: 'Temple',        note: 'Temple of Dawn on the Chao Phraya river' },
+      { name: 'Chatuchak Market',   coords: [13.7999, 100.5500], type: 'Market',        note: 'World\'s largest weekend market' },
+      { name: 'Asiatique The Riverfront', coords: [13.7040, 100.5100], type: 'Night Market', note: 'Riverside night bazaar & Ferris wheel' },
+    ],
   },
 };
 
-/* ── LOAD USER-ADDED PLACES FROM LOCALSTORAGE ── */
+/* ── LOCALSTORAGE ── */
 function loadUserPlaces() {
   try {
-    const saved = localStorage.getItem('userPlaces');
+    const saved = localStorage.getItem('userPlaces2');
     if (!saved) return;
     const data = JSON.parse(saved);
     ['phuket', 'bangkok'].forEach(city => {
-      if (data[city]) cities[city].restaurants.push(...data[city]);
+      if (data[city]?.restaurants) cities[city].restaurants.push(...data[city].restaurants);
+      if (data[city]?.attractions) cities[city].attractions.push(...data[city].attractions);
     });
   } catch(e) {}
 }
 
 function saveUserPlaces() {
-  const data = { phuket: [], bangkok: [] };
+  const data = {};
   ['phuket', 'bangkok'].forEach(city => {
-    data[city] = cities[city].restaurants.filter(r => r._user);
+    data[city] = {
+      restaurants: cities[city].restaurants.filter(r => r._user),
+      attractions: cities[city].attractions.filter(a => a._user),
+    };
   });
-  localStorage.setItem('userPlaces', JSON.stringify(data));
+  localStorage.setItem('userPlaces2', JSON.stringify(data));
 }
 
 loadUserPlaces();
@@ -460,18 +517,19 @@ function makeIcon(emoji, size = 32) {
 const hotelIcon      = makeIcon('🏨', 36);
 const restaurantIcon = makeIcon('🍽', 28);
 const michelinIcon   = makeIcon('⭐', 30);
+const attractionIcon = makeIcon('🏛', 28);
 const pinIcon        = makeIcon('📍', 28);
 
 /* ── STATE ── */
-let markers    = [];
+let allMarkers = [];   // flat list matching panel order: [hotel, ...restaurants, ...attractions]
 let mapReady   = false;
 let pickingPin = null;
 
 /* ── BUILD VIEW ── */
 function buildCity(cityKey) {
   const city = cities[cityKey];
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
+  allMarkers.forEach(m => map.removeLayer(m));
+  allMarkers = [];
 
   if (!mapReady) {
     map.setView(city.center, city.zoom);
@@ -480,21 +538,35 @@ function buildCity(cityKey) {
     map.flyTo(city.center, city.zoom, { duration: 1.2 });
   }
 
+  // Hotel — index 0
   const hm = L.marker(city.hotel.coords, { icon: hotelIcon })
     .addTo(map)
     .bindPopup(popupHtml(city.hotel.name, city.hotel.note, null, null, 'Your Hotel'), { className: 'custom-popup' });
-  hm.on('click', () => selectPlace(0));
-  markers.push(hm);
+  hm.on('click', () => selectMarker(0));
+  allMarkers.push(hm);
 
+  // Restaurants — indices 1…R
   city.restaurants.forEach((r, i) => {
     const km   = haversine(city.hotel.coords, r.coords);
     const icon = r.michelin ? michelinIcon : restaurantIcon;
-    const cuisineLabel = r.michelin ? `⭐ Michelin Star · ${r.cuisine}` : r.cuisine;
-    const m  = L.marker(r.coords, { icon })
+    const sub  = r.michelin ? `⭐ Michelin Star · ${r.cuisine}` : r.cuisine;
+    const m = L.marker(r.coords, { icon })
       .addTo(map)
-      .bindPopup(popupHtml(r.name, r.note, fmtDist(km), driveTime(km, r._tf || 1), cuisineLabel), { className: 'custom-popup' });
-    m.on('click', () => selectPlace(i + 1));
-    markers.push(m);
+      .bindPopup(popupHtml(r.name, r.note, fmtDist(km), driveTime(km, r._tf || 1), sub), { className: 'custom-popup' });
+    const idx = allMarkers.length;
+    m.on('click', () => selectMarker(idx));
+    allMarkers.push(m);
+  });
+
+  // Attractions — indices after restaurants
+  city.attractions.forEach((a, i) => {
+    const km = haversine(city.hotel.coords, a.coords);
+    const m  = L.marker(a.coords, { icon: attractionIcon })
+      .addTo(map)
+      .bindPopup(popupHtml(a.name, a.note, fmtDist(km), driveTime(km), a.type), { className: 'custom-popup' });
+    const idx = allMarkers.length;
+    m.on('click', () => selectMarker(idx));
+    allMarkers.push(m);
   });
 
   buildPanel(cityKey);
@@ -515,47 +587,89 @@ function popupHtml(name, note, dist, time, sub) {
 
 function buildPanel(cityKey) {
   const city = cities[cityKey];
-  const list = document.getElementById('place-list');
-  list.innerHTML = '';
 
-  [city.hotel, ...city.restaurants].forEach((p, i) => {
-    const isHotel = i === 0;
-    const km      = isHotel ? null : haversine(city.hotel.coords, p.coords);
-    const tf      = p._tf || 1;
-    const slow    = tf > 1.3;
-    const clear   = tf < 0.95;
+  // Hotel
+  const hotelList = document.getElementById('list-hotel');
+  hotelList.innerHTML = '';
+  const hLi = document.createElement('li');
+  hLi.innerHTML = `
+    <span class="place-icon">🏨</span>
+    <div class="place-info">
+      <div class="place-name">${city.hotel.name}</div>
+      <div class="place-type">Your Hotel</div>
+    </div>
+    <div class="place-meta"><div class="place-dist" style="color:#f4a261">Base</div></div>
+  `;
+  hLi.addEventListener('click', () => selectMarker(0));
+  hotelList.appendChild(hLi);
+
+  // Restaurants
+  const resList = document.getElementById('list-restaurants');
+  resList.innerHTML = '';
+  city.restaurants.forEach((r, i) => {
+    const markerIdx = 1 + i;
+    const km   = haversine(city.hotel.coords, r.coords);
+    const tf   = r._tf || 1;
+    const slow  = tf > 1.3;
+    const clear = tf < 0.95;
+    const icon  = r.michelin ? '⭐' : '🍽';
+    const sub   = r.michelin ? `⭐ Michelin Star · ${r.cuisine}` : r.cuisine;
 
     const li = document.createElement('li');
-    const placeIcon      = isHotel ? '🏨' : (p.michelin ? '⭐' : '🍽');
-    const cuisineDisplay = isHotel ? 'Your Hotel' : (p.michelin ? `⭐ Michelin Star · ${p.cuisine}` : p.cuisine);
     li.innerHTML = `
-      <span class="place-icon">${placeIcon}</span>
+      <span class="place-icon">${icon}</span>
       <div class="place-info">
-        <div class="place-name">${p.name}${!isHotel && slow ? ' <span style="color:#f4a261;font-size:10px">🚦 slow</span>' : ''}${!isHotel && clear ? ' <span style="color:#52b788;font-size:10px">✅ clear</span>' : ''}</div>
-        <div class="place-type" style="${p.michelin ? 'color:#f4d03f' : ''}">${cuisineDisplay}</div>
+        <div class="place-name">${r.name}${slow ? ' <span style="color:#f4a261;font-size:10px">🚦 slow</span>' : ''}${clear ? ' <span style="color:#52b788;font-size:10px">✅ clear</span>' : ''}</div>
+        <div class="place-type" style="${r.michelin ? 'color:#f4d03f' : ''}">${sub}</div>
       </div>
       <div class="place-meta">
-        ${km !== null
-          ? `<div class="place-dist">${fmtDist(km)}</div><div class="place-time">~${driveTime(km, tf)}</div>`
-          : '<div class="place-dist" style="color:#f4a261">Base</div>'}
+        <div class="place-dist">${fmtDist(km)}</div>
+        <div class="place-time">~${driveTime(km, tf)}</div>
       </div>
-      ${p._user ? `<button class="delete-btn" title="Remove" onclick="deletePlace(event,'${cityKey}',${i - 1})">✕</button>` : ''}
+      ${r._user ? `<button class="delete-btn" title="Remove" onclick="deletePlace(event,'${cityKey}','restaurant',${i})">✕</button>` : ''}
     `;
-    li.addEventListener('click', () => selectPlace(i));
-    list.appendChild(li);
+    li.addEventListener('click', () => selectMarker(markerIdx));
+    resList.appendChild(li);
+  });
+
+  // Attractions
+  const attrList = document.getElementById('list-attractions');
+  attrList.innerHTML = '';
+  const attrOffset = 1 + city.restaurants.length;
+  city.attractions.forEach((a, i) => {
+    const markerIdx = attrOffset + i;
+    const km = haversine(city.hotel.coords, a.coords);
+    const tf = 1;
+
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span class="place-icon">🏛</span>
+      <div class="place-info">
+        <div class="place-name">${a.name}</div>
+        <div class="place-type">${a.type}</div>
+      </div>
+      <div class="place-meta">
+        <div class="place-dist">${fmtDist(km)}</div>
+        <div class="place-time">~${driveTime(km, tf)}</div>
+      </div>
+      ${a._user ? `<button class="delete-btn" title="Remove" onclick="deletePlace(event,'${cityKey}','attraction',${i})">✕</button>` : ''}
+    `;
+    li.addEventListener('click', () => selectMarker(markerIdx));
+    attrList.appendChild(li);
   });
 }
 
-function selectPlace(idx) {
-  document.querySelectorAll('#place-list li').forEach((li, i) =>
+function selectMarker(idx) {
+  document.querySelectorAll('.place-list li').forEach((li, i) =>
     li.classList.toggle('selected', i === idx));
-  const m = markers[idx];
+  const m = allMarkers[idx];
   if (m) { map.panTo(m.getLatLng(), { animate: true }); m.openPopup(); }
 }
 
-function deletePlace(e, cityKey, idx) {
+function deletePlace(e, cityKey, section, idx) {
   e.stopPropagation();
-  cities[cityKey].restaurants.splice(idx, 1);
+  if (section === 'restaurant') cities[cityKey].restaurants.splice(idx, 1);
+  else                          cities[cityKey].attractions.splice(idx, 1);
   saveUserPlaces();
   buildCity(cityKey);
 }
@@ -571,9 +685,20 @@ function switchCity(key) {
 
 /* ── ADD PLACE FLOW ── */
 let pendingCoords = null;
+let placeType = 'restaurant';
+
+function setType(t) {
+  placeType = t;
+  document.getElementById('type-restaurant').classList.toggle('active', t === 'restaurant');
+  document.getElementById('type-attraction').classList.toggle('active', t === 'attraction');
+  document.getElementById('label-cuisine').textContent  = t === 'restaurant' ? 'Cuisine / Type' : 'Category';
+  document.getElementById('field-cuisine').placeholder  = t === 'restaurant' ? 'e.g. Thai, Street Food, Café' : 'e.g. Temple, Beach, Market';
+  document.getElementById('michelin-row').style.display = t === 'restaurant' ? 'flex' : 'none';
+}
 
 function startAddPlace() {
   pendingCoords = null;
+  placeType = 'restaurant';
   document.getElementById('field-name').value      = '';
   document.getElementById('field-cuisine').value   = '';
   document.getElementById('field-note').value      = '';
@@ -583,6 +708,7 @@ function startAddPlace() {
   document.getElementById('coords-display').textContent = 'Paste a Maps link above, or pick on map';
   document.getElementById('coords-display').classList.add('empty');
   document.getElementById('modal-save').disabled = true;
+  setType('restaurant');
   document.getElementById('add-modal').classList.add('visible');
 }
 
@@ -602,10 +728,8 @@ function startPicking() {
 function onMapPick(e) {
   stopPicking();
   pendingCoords = [e.latlng.lat, e.latlng.lng];
-
   if (pickingPin) map.removeLayer(pickingPin);
   pickingPin = L.marker(pendingCoords, { icon: pinIcon }).addTo(map);
-
   document.getElementById('coords-display').textContent =
     `${pendingCoords[0].toFixed(6)}, ${pendingCoords[1].toFixed(6)}`;
   document.getElementById('coords-display').classList.remove('empty');
@@ -625,13 +749,10 @@ document.getElementById('field-name').addEventListener('input', function() {
 });
 
 function parseMapsUrl(url) {
-  // Format: !3d<lat>!4d<lng>
   let m = url.match(/!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/);
   if (m) return [parseFloat(m[1]), parseFloat(m[2])];
-  // Format: @<lat>,<lng>,<zoom>z
   m = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*),[\d.]+z/);
   if (m) return [parseFloat(m[1]), parseFloat(m[2])];
-  // Format: ll=<lat>,<lng>
   m = url.match(/[?&]ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
   if (m) return [parseFloat(m[1]), parseFloat(m[2])];
   return null;
@@ -640,10 +761,7 @@ function parseMapsUrl(url) {
 document.getElementById('field-maps-url').addEventListener('input', function() {
   const errEl = document.getElementById('url-error');
   const val = this.value.trim();
-  if (!val) {
-    errEl.style.display = 'none';
-    return;
-  }
+  if (!val) { errEl.style.display = 'none'; return; }
   const coords = parseMapsUrl(val);
   if (coords) {
     errEl.style.display = 'none';
@@ -662,16 +780,19 @@ document.getElementById('field-maps-url').addEventListener('input', function() {
 
 function savePlace() {
   const name    = document.getElementById('field-name').value.trim();
-  const cuisine = document.getElementById('field-cuisine').value.trim() || 'Restaurant';
+  const cuisine = document.getElementById('field-cuisine').value.trim() || (placeType === 'restaurant' ? 'Restaurant' : 'Attraction');
   const note    = document.getElementById('field-note').value.trim();
   const michelin = document.getElementById('michelin-check').checked;
 
   if (!name || !pendingCoords) return;
 
-  const place = { name, coords: pendingCoords, cuisine, note, michelin: michelin || undefined, _user: true };
-  cities[currentCity].restaurants.push(place);
-  saveUserPlaces();
+  if (placeType === 'restaurant') {
+    cities[currentCity].restaurants.push({ name, coords: pendingCoords, cuisine, note, michelin: michelin || undefined, _user: true });
+  } else {
+    cities[currentCity].attractions.push({ name, coords: pendingCoords, type: cuisine, note, _user: true });
+  }
 
+  saveUserPlaces();
   if (pickingPin) { map.removeLayer(pickingPin); pickingPin = null; }
   cancelAddPlace();
   buildCity(currentCity);
