@@ -278,6 +278,19 @@
     .type-toggle button.active { background: #4285F4; color: #fff; }
     .type-toggle button:first-child { border-right: 1px solid #2a2a4a; }
 
+    .edit-hotel-btn {
+      background: none;
+      border: none;
+      color: #4285F4;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 2px 4px;
+      opacity: 0;
+      transition: opacity 0.15s;
+      flex-shrink: 0;
+    }
+    #list-hotel li:hover .edit-hotel-btn { opacity: 1; }
+
     #coords-display {
       background: #1a1a3e;
       border: 1px solid #2a2a4a;
@@ -355,7 +368,7 @@
     <button id="modal-close" onclick="cancelAddPlace()">✕</button>
   </div>
   <div id="modal-body">
-    <div>
+    <div id="type-row">
       <div class="field-label">Type</div>
       <div class="type-toggle">
         <button id="type-restaurant" class="active" onclick="setType('restaurant')">🍽 Restaurant</button>
@@ -599,6 +612,7 @@ function buildPanel(cityKey) {
       <div class="place-type">Your Hotel</div>
     </div>
     <div class="place-meta"><div class="place-dist" style="color:#f4a261">Base</div></div>
+    <button class="edit-hotel-btn" title="Change hotel" onclick="startEditHotel(event)">✏️</button>
   `;
   hLi.addEventListener('click', () => selectMarker(0));
   hotelList.appendChild(hLi);
@@ -696,9 +710,45 @@ function setType(t) {
   document.getElementById('michelin-row').style.display = t === 'restaurant' ? 'flex' : 'none';
 }
 
+function startEditHotel(e) {
+  e.stopPropagation();
+  const hotel = cities[currentCity].hotel;
+  pendingCoords = [...hotel.coords];
+  placeType = 'hotel';
+
+  document.getElementById('type-row').style.display    = 'none';
+  document.getElementById('michelin-row').style.display = 'none';
+  document.getElementById('label-cuisine').textContent  = 'Note';
+  document.getElementById('modal-header').querySelector('span') && null;
+  document.querySelector('#modal-header').childNodes[0].textContent = 'Change Hotel';
+
+  document.getElementById('field-name').value     = hotel.name;
+  document.getElementById('field-cuisine').value  = hotel.note || '';
+  document.getElementById('field-note').value     = '';
+  document.getElementById('field-maps-url').value = '';
+  document.getElementById('url-error').style.display = 'none';
+  document.getElementById('coords-display').textContent =
+    `${hotel.coords[0].toFixed(6)}, ${hotel.coords[1].toFixed(6)}`;
+  document.getElementById('coords-display').classList.remove('empty');
+  document.getElementById('modal-save').disabled = false;
+  document.getElementById('field-note').closest('div').style.display = 'none';
+
+  if (pickingPin) map.removeLayer(pickingPin);
+  pickingPin = L.marker(pendingCoords, { icon: pinIcon }).addTo(map);
+
+  document.getElementById('add-modal').classList.add('visible');
+}
+
+function resetModal() {
+  document.getElementById('type-row').style.display   = 'block';
+  document.getElementById('field-note').closest('div').style.display = 'block';
+  document.querySelector('#modal-header').childNodes[0].textContent = 'Add New Place';
+}
+
 function startAddPlace() {
   pendingCoords = null;
   placeType = 'restaurant';
+  resetModal();
   document.getElementById('field-name').value      = '';
   document.getElementById('field-cuisine').value   = '';
   document.getElementById('field-note').value      = '';
@@ -714,6 +764,7 @@ function startAddPlace() {
 
 function cancelAddPlace() {
   document.getElementById('add-modal').classList.remove('visible');
+  resetModal();
   stopPicking();
 }
 
@@ -786,7 +837,9 @@ function savePlace() {
 
   if (!name || !pendingCoords) return;
 
-  if (placeType === 'restaurant') {
+  if (placeType === 'hotel') {
+    cities[currentCity].hotel = { name, coords: pendingCoords, note: cuisine };
+  } else if (placeType === 'restaurant') {
     cities[currentCity].restaurants.push({ name, coords: pendingCoords, cuisine, note, michelin: michelin || undefined, _user: true });
   } else {
     cities[currentCity].attractions.push({ name, coords: pendingCoords, type: cuisine, note, _user: true });
