@@ -856,7 +856,7 @@ function selectMarker(idx) {
     centerPx.y + (markerPx.y - targetY)
   );
   const desiredCenter = map.containerPointToLatLng(desiredCenterPx);
-  map.panTo(desiredCenter, { animate: true, duration: 0.5 });
+  map.flyTo(desiredCenter, 17, { animate: true, duration: 0.8 });
 }
 
 function deletePlace(e, cityKey, section, idx) {
