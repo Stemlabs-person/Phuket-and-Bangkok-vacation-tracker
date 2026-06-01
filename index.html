@@ -1161,7 +1161,8 @@ TOP_REVIEW: <text>`;
     saveUserPlaces();
     buildCity(currentCity);
   } catch (err) {
-    console.warn('Auto-fill failed:', err);
+    console.error('Auto-fill failed:', err);
+    alert('Auto-fill error: ' + err.message);
   }
 }
 
