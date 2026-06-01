@@ -318,7 +318,7 @@
       transition: all 0.15s;
     }
     .type-toggle button.active { background: #4285F4; color: #fff; }
-    .type-toggle button:first-child { border-right: 1px solid #2a2a4a; }
+    .type-toggle button:not(:last-child) { border-right: 1px solid #2a2a4a; }
 
     .edit-hotel-btn {
       background: none;
@@ -419,6 +419,9 @@
     <!-- Attractions -->
     <div class="section-header">🏛 Tourist Attractions</div>
     <ul class="place-list" id="list-attractions"></ul>
+    <!-- Casual Activities -->
+    <div class="section-header">🌴 Casual Activities</div>
+    <ul class="place-list" id="list-casuals"></ul>
   </div>
 </div>
 
@@ -433,7 +436,8 @@
       <div class="field-label">Type</div>
       <div class="type-toggle">
         <button id="type-restaurant" class="active" onclick="setType('restaurant')">🍽 Restaurant</button>
-        <button id="type-attraction"             onclick="setType('attraction')">🏛 Attraction</button>
+        <button id="type-attraction"               onclick="setType('attraction')">🏛 Attraction</button>
+        <button id="type-casual"                   onclick="setType('casual')">🌴 Casual</button>
       </div>
     </div>
     <div>
@@ -494,6 +498,13 @@ const cities = {
       { name: 'Siam Supper Club',      coords: [7.9875, 98.3000],       cuisine: 'Steakhouse / Grill',   note: 'Upscale dinner spot beloved by expats near Laguna — great steaks, cocktails & lively atmosphere',             meals: ['dinner'],            hours: 'Daily 6pm–12am',            desc: 'The Siam Supper Club is Phuket\'s most beloved upscale dinner destination for expats, long-stay visitors, and discerning travellers who want great food alongside a genuinely lively and social atmosphere. The restaurant is built around exceptional aged and imported steaks — the ribeye and wagyu options are consistently outstanding — complemented by a drinks program of inventive signature cocktails that the bar team clearly takes as seriously as the kitchen. On weekend evenings, live music fills the space with a warm energy that makes it feel more like a celebration than just dinner. The interior is moody and well-designed, the lighting is flattering, and the service strikes that rare balance of polished without being stiff. A perfect choice for a memorable night out near Laguna without having to travel far from Banyan Tree.', topReview: '"The ribeye was cooked to such precise, perfect medium-rare that I actually asked to speak to the chef to compliment them. The cocktails were inventive and genuinely strong, the live music on Saturday was fantastic, and the whole place had serious, infectious energy. Easily one of the best nights of our entire holiday in Phuket. We went back the following weekend." — Paul J., Google Reviews ⭐⭐⭐⭐⭐' },
       { name: 'Acqua Restaurant',      coords: [7.9295, 98.2815],       cuisine: 'Italian / Seafood',    note: 'Cliff-top fine-dining dinner near Kamala with sweeping sea views, about 20 min from Banyan Tree',             michelin: true, meals: ['dinner'], hours: 'Daily 6pm–10:30pm',         desc: 'Acqua is one of the most dramatically situated restaurants in all of Thailand — perched on a cliff above Kamala Bay with a terrace that looks directly out over the dark Andaman Sea, it combines Michelin-recognised Italian-Mediterranean cooking with a setting that seems almost too beautiful to be real. The pasta is handmade in-house daily; the seafood arrives fresh from local day-boats; the risottos are finished tableside with aged parmesan. As the sun sinks into the horizon, the sky turns extraordinary shades of orange, red, and violet, and the whole restaurant seems to hold its breath. The wine cellar is one of the finest in Phuket. The experience is best described as a complete sensory event — food, view, sound of the sea, warm salt air — and it is worth every penny. Book the terrace table in advance and arrive before sunset.', topReview: '"We booked for a special anniversary and Acqua exceeded absolutely every single one of our expectations. The handmade pasta was the best I\'ve had outside of Italy, the seafood was impeccably fresh and beautifully cooked, and watching the sun drop slowly into the Andaman Sea from our clifftop table was genuinely one of the most magical moments we have ever shared while travelling. Perfect in every single way." — Emma R., TripAdvisor ⭐⭐⭐⭐⭐' },
     ],
+    casuals: [
+      { name: 'Oasis Spa Laguna',            coords: [7.9915, 98.3005], type: 'Massage & Spa',    note: 'Luxury day spa 5 min from Banyan Tree — Thai massage, aromatherapy & body scrubs', hours: 'Daily 10am–10pm', desc: 'Oasis Spa is widely regarded as one of the finest day spas in the Laguna area, a beautifully landscaped retreat just minutes from Banyan Tree that feels worlds away from the resort strip. The treatment menu covers everything from the classic Thai herbal compress massage — where heated linen pouches filled with turmeric, lemongrass, and kaffir lime are pressed into tired muscles with expert, rhythmic precision — to deep-tissue sports massage, traditional foot reflexology, and signature aromatherapy body wraps using locally sourced ingredients. The therapists are trained to a high standard and the whole experience is unhurried and attentive. Private treatment rooms, a steam room, and a cool-dip pool complete the offering. Book ahead for peak season; a 90-minute Thai massage here is one of the true pleasures of the Laguna area.', topReview: '"Booked a two-hour Thai herbal massage and left feeling like an entirely different human being. The therapist was extraordinarily skilled, the setting was genuinely beautiful, and the whole experience was luxurious without being stuffy. Hands-down the best spa treatment I\'ve had anywhere in Southeast Asia. We went back twice more during the same week." — Claire H., Google Reviews ⭐⭐⭐⭐⭐' },
+      { name: 'Bang Tao Beach Volleyball',   coords: [7.9968, 98.2892], type: 'Beach Volleyball', note: 'Nets along Bang Tao Beach — free public courts right on the sand', hours: 'Dawn to dusk', desc: 'Bang Tao Beach has one of the best setups for beach volleyball on Phuket\'s west coast — multiple nets are strung along the wide, flat stretch of sand in front of the laguna resort area, and the beach itself is broad enough that impromptu games kick off naturally throughout the day. The sand is fine and relatively firm underfoot, the Andaman Sea breeze keeps temperatures manageable even at midday, and the relaxed atmosphere means it is equally easy to join a casual pickup game or organise a competitive match among your own group. Rent equipment from the beachside vendors if you don\'t bring your own. The evening session, when the light turns golden and the temperature drops, is particularly good.', topReview: '"Came down for a game thinking we\'d play for thirty minutes and ended up staying for three hours — the sand is perfect, the vibe is completely relaxed, and there were enough people around to keep the games going all afternoon. The sunset over the Andaman Sea while you\'re playing is an absolutely unforgettable backdrop. One of the best spontaneous afternoons of the whole holiday." — Josh T., TripAdvisor ⭐⭐⭐⭐⭐' },
+      { name: 'Phuket Pickleball Club',      coords: [7.9848, 98.3098], type: 'Pickleball',       note: 'Outdoor pickleball courts with equipment hire — near Laguna', hours: 'Daily 7am–8pm', desc: 'Phuket\'s pickleball scene has grown rapidly over the past few years and this club has become the go-to facility in the Laguna area for both resident expats and visiting players. There are multiple outdoor hard courts with proper lighting for evening play, paddle and ball hire available at the front desk, and a small café on site serving cold drinks and light snacks between sets. The standard of play ranges from complete beginners to competitive club-level regulars, and the welcoming atmosphere means drop-in players are genuinely made to feel part of the group from the first rally. Coaching sessions are also available for those wanting to improve their game. Arrive early on weekend mornings when the courts fill up quickly.', topReview: '"Found this place on day two of the holiday and ended up playing every single morning for the rest of the trip. The courts are in great condition, the equipment hire is cheap, and the regular players who show up each morning are wonderfully welcoming to newcomers. The perfect way to start a Phuket day before the heat kicks in." — Steve M., Google Reviews ⭐⭐⭐⭐⭐' },
+      { name: 'Boat Avenue',                 coords: [7.9942, 98.3067], type: 'Shopping',          note: 'Relaxed open-air lifestyle mall in Laguna — boutiques, cafés & restaurants', hours: 'Daily 10am–10pm', desc: 'Boat Avenue is the most accessible and most pleasant shopping destination in the Laguna area — a well-designed open-air mall built around a central courtyard and waterway that houses a carefully curated mix of independent boutiques, international brands, speciality food shops, and restaurants. The scale is human and manageable rather than overwhelming, making it ideal for an easy afternoon browse. Highlights include a well-stocked wine merchant, several good resort-wear boutiques, a Rimping Supermarket for quality local produce and imported goods, and a strong selection of restaurants and cafés for a long lunch or early dinner. The atmosphere is relaxed and unhurried, the shading is generous, and it is within easy cycling or tuk-tuk distance of Banyan Tree.', topReview: '"This is exactly the kind of shopping centre a holiday calls for — small enough to be pleasant, good enough to actually find things worth buying, and with enough food and drink options that you naturally end up staying for most of the afternoon. The wine shop is excellent, the café options are solid, and the whole place has a genuinely lovely, unhurried atmosphere. Our default afternoon stop whenever we needed to recharge." — Fiona L., Google Reviews ⭐⭐⭐⭐⭐' },
+      { name: 'Central Festival Phuket',     coords: [7.9127, 98.3343], type: 'Shopping Mall',     note: 'Phuket\'s largest mall — fashion, food hall, cinema, supermarket', hours: 'Daily 11am–10pm', desc: 'Central Festival Phuket is the largest and most comprehensive shopping mall on the island — a full-scale, air-conditioned complex in the Phuket Town area that covers virtually every retail and entertainment need in one visit. The fashion floors cover everything from high-street Thai brands to international names; the basement Tops Supermarket is one of the best-stocked on the island; and the Top Floor food hall has enough variety to satisfy any craving, from excellent Thai street-food stalls to proper sushi, wood-fired pizza, and dessert counters. A multiplex cinema sits at the top of the building, and the ground floor atrium regularly hosts promotions and exhibitions. It\'s the practical choice for a day of efficient shopping, stocking up on supplies, or simply escaping the heat in a blast of good air conditioning.', topReview: '"Everything you could possibly need is under one roof and the food hall alone justifies making the trip. Picked up beach gear, good sunscreen, a pile of local snacks, and then had a genuinely excellent bowl of boat noodles from one of the food court stalls — all in a single two-hour visit. The cinema is solid for a rainy afternoon. Practical, efficient, and actually quite pleasant." — David R., TripAdvisor ⭐⭐⭐⭐' },
+    ],
     attractions: [
       { name: 'Big Buddha',       coords: [7.8274, 98.3094], type: 'Landmark',   note: 'Giant white marble Buddha, panoramic views',            desc: 'The Big Buddha of Phuket is a colossal 45-metre statue of white Carrara marble that crowns Nakkerd Hill in the centre of the island, visible from almost every corner of Phuket on a clear day. Construction began in 2004 and it remains an active sacred site, continuously funded by Buddhist devotees across Thailand and Southeast Asia. The atmosphere at the summit is genuinely peaceful and contemplative — monks chant in the pavilion below, incense drifts through the warm air, and the panoramic views stretch across both the east and west coasts of the island simultaneously, taking in Chalong Bay, Kata Beach, and the distant Phang Nga archipelago. The walk from the car park to the base is lined with donation plaques and smaller Buddha images. Dress modestly and go either at sunrise for quiet golden light or at dusk to watch the sky change colour behind the statue.', topReview: '"Standing at the very base of this incredible statue and looking out over the entire island was one of the most genuinely serene and humbling moments of my life. I visited at sunrise and had the whole place essentially to myself — the light was extraordinary, the silence was profound, and the sense of peace was unlike anything I\'ve experienced at any other landmark in Southeast Asia. Go early, go respectfully, and go more than once if you can." — Jessica L., Google Reviews ⭐⭐⭐⭐⭐' },
       { name: 'Wat Chalong',      coords: [7.8452, 98.3367], type: 'Temple',     note: 'Most important Buddhist temple in Phuket',              desc: 'Wat Chalong is the most important and most visited Buddhist temple in Phuket, with a history stretching back to the early 19th century and a significance in island life that goes far beyond tourism. The temple complex is centred on the Grand Pagoda — a soaring, gilded chedi said to enshrine a splinter of the Buddha\'s bone — which you can walk around and enter to find floor-to-ceiling murals depicting key scenes from the life of the Buddha rendered in extraordinary detail. The outer grounds are dotted with statues, offering platforms, and pavilions housing the revered monk effigies of Luang Pho Chaem and Luang Pho Chuang, who are credited with leading local resistance during a 19th-century rebellion and who are still deeply venerated today. In the early morning the temple is alive with worshippers lighting incense, releasing spirit lanterns, and making offerings — a powerful and moving thing to witness.', topReview: '"Visited first thing in the early morning and had the entire complex almost entirely to ourselves. The gilded chedi glowing in the warm morning light was one of the most beautiful sights I experienced in all of Thailand. The interior murals are breathtaking in their detail and the whole atmosphere is one of genuine, living spiritual devotion rather than a tourist attraction. Dress respectfully, remove your shoes, and take your time." — Robert K., TripAdvisor ⭐⭐⭐⭐⭐' },
@@ -514,6 +525,13 @@ const cities = {
     restaurants: [
       { name: 'Blue Elephant', coords: [13.7217, 100.5140], cuisine: 'Royal Thai Cuisine', note: 'Michelin-starred royal Thai dining in a heritage mansion', michelin: true, meals: ['lunch','dinner'], hours: 'Mon–Fri 11:30am–2:30pm, 6:30–10:30pm; Sat–Sun 11am–2:30pm, 6:30–10:30pm', desc: 'Blue Elephant Bangkok is set inside a magnificent 19th-century Sino-Portuguese heritage mansion in the Sathorn district, a short tuk-tuk ride from the Chao Phraya river. It has been one of the most celebrated restaurants in Bangkok for over three decades, holding consistent Michelin recognition and drawing guests from across the world who come specifically to experience the highest expression of royal Thai cuisine. The menu is a scholarly and deeply flavourful exploration of dishes that once graced the tables of the Thai royal court — intricately balanced curries, delicate steamed dumplings, aromatic soups layered with lemongrass and galangal, and desserts built around coconut, pandan, and jasmine. Service is formal but warm, the private dining rooms are spectacular, and the cooking school attached to the restaurant is one of the finest in Thailand if you want to learn the techniques yourself.', topReview: '"We dined here on our very last evening in Bangkok and it was the most perfect possible send-off to the city. The royal set menu was extraordinary from the very first amuse-bouche to the final petit four — every dish showed real mastery, real care, and real depth of flavour. The service was immaculate throughout. The most memorable restaurant meal of the entire trip and possibly of the last several years." — Caroline M., TripAdvisor ⭐⭐⭐⭐⭐' },
     ],
+    casuals: [
+      { name: 'Healthland Spa & Massage',    coords: [13.7355, 100.5618], type: 'Massage & Spa',    note: 'Renowned traditional Thai massage & spa near Asok — exceptional value', hours: 'Daily 9am–11pm', desc: 'Healthland is the gold standard of honest, affordable Thai spa in Bangkok — a large, well-run operation near the Asok intersection with a reputation stretching back decades among both Bangkok residents and returning travellers. The facility is spotlessly clean, the therapists are rigorously trained in traditional Thai massage technique, and the pricing is extraordinarily fair for the quality of the experience. The signature two-hour Thai massage follows the traditional sen (energy line) sequence with strong, confident pressure and proper joint mobilisation that leaves you feeling genuinely restored rather than simply oiled. Oil massage, foot reflexology, herbal compress, and facial treatments are also on the menu. Walk-ins are taken but booking ahead is advisable at weekends and evenings.', topReview: '"Went in for a 90-minute Thai massage and it was easily one of the best I\'ve had in twenty years of travelling to Thailand. The therapist was strong, precise, and clearly knew exactly what they were doing. The facility is huge, the rooms are clean and private, and the price is a fraction of what you\'d pay at a hotel spa for a comparable experience. This is now a mandatory stop every single time I\'m in Bangkok." — Martin K., TripAdvisor ⭐⭐⭐⭐⭐' },
+      { name: 'Terminal 21',                 coords: [13.7376, 100.5604], type: 'Shopping Mall',     note: 'Airport-themed mall at Asok BTS — unique floor themes & legendary food court', hours: 'Daily 10am–10pm', desc: 'Terminal 21 is one of Bangkok\'s most entertaining and distinctive shopping malls — each floor is themed as a different global city or airport terminal, from the Tokyo basement food court to the Istanbul rooftop level, with surprisingly convincing set-dressing and signage throughout. But the real reason to visit is Pier 21 — the fifth-floor food court that is widely regarded as the best-value, highest-quality food court in all of Bangkok, with dozens of Thai and Asian dishes priced between 35 and 80 baht. The pad thai, the boat noodles, the mango sticky rice, and the grilled pork rice are all exceptional. The mall itself is busy but navigable and has a good mix of Thai fashion boutiques, imported cosmetics, and independent shops that you won\'t find in the bigger luxury malls nearby.', topReview: '"The Pier 21 food court alone makes Terminal 21 worth visiting — genuinely excellent Thai food at prices that feel almost absurdly cheap by Bangkok standards, let alone international ones. The theming of the whole mall is surprisingly well-done and genuinely fun to wander through. We ate here four times during a week in Bangkok and it never got old." — Priya S., Google Reviews ⭐⭐⭐⭐⭐' },
+      { name: 'EmQuartier',                  coords: [13.7310, 100.5692], type: 'Shopping Mall',     note: 'Upscale Sukhumvit mall with rooftop garden, helical escalator & top restaurants', hours: 'Daily 10am–10pm', desc: 'EmQuartier is the most architecturally striking shopping complex on Sukhumvit — a trio of interconnected towers anchored by the Helix building, whose signature spiralling outdoor walkway wraps around a vertical garden and connects 40-plus restaurants and bars across multiple floors with sweeping views of the Bangkok skyline. The retail offering is premium and international, with flagship stores for leading fashion and lifestyle brands across the lower floors. But the upper levels are the real draw: a remarkable concentration of exceptional restaurants ranging from Japanese fine-dining and contemporary Thai to specialist ramen, Cantonese dim sum, and European bistros. The rooftop Botanical Garden on the top floor is a genuinely beautiful green space for a walk between meals. Part of the broader EmDistrict complex that also includes Emporium next door.', topReview: '"Spent an entire afternoon in EmQuartier and barely scratched the surface. The restaurant selection on the upper floors is genuinely world-class — we had the best Japanese breakfast of the entire trip in a small counter-seat spot on level 5. The helical walkway with the hanging gardens is spectacular to look at and surprisingly enjoyable to actually walk. An extraordinary piece of design in an already extraordinary city." — Alice W., TripAdvisor ⭐⭐⭐⭐⭐' },
+      { name: 'Lumphini Park',               coords: [13.7306, 100.5416], type: 'Park & Activities', note: 'Bangkok\'s green lung — jogging track, paddle boats, outdoor gym & giant lizards', hours: 'Daily 4:30am–9pm', desc: 'Lumphini Park is Bangkok\'s most beloved public green space — a 142-acre sanctuary in the heart of the city that provides a remarkable counterpoint to the surrounding concrete and traffic. In the early morning it fills with Thai residents practising tai chi on the lakeside paths, doing group aerobics to pumping speakers, running the perimeter jogging track, or lifting weights at the free outdoor gym stations. The central lake can be explored by paddle boat or rowing boat hired from the dock, and the tree-lined paths make for a genuinely pleasant walk at any time of day. Lumphini is also famous for its resident population of large water monitors — impressive lizards up to two metres long that sun themselves on the banks of the lake completely unbothered by human proximity. The park is best visited early morning or after 5pm when the temperature drops.', topReview: '"Woke up at 6am and walked over from the hotel for a morning run and was completely unprepared for how beautiful and alive the park is at that hour. Hundreds of people doing everything from tai chi to aerobics to badminton, giant monitor lizards patrolling the lakeside without a care in the world, and the whole city feeling impossibly peaceful. A completely different side of Bangkok that most visitors never see." — Tom A., Google Reviews ⭐⭐⭐⭐⭐' },
+      { name: 'ICON SIAM',                   coords: [13.7267, 100.5099], type: 'Shopping Mall',     note: 'Mega riverside mall with indoor floating market & stunning Chao Phraya views', hours: 'Daily 10am–10pm', desc: 'ICON SIAM is one of the most spectacular shopping malls in Asia — a colossal riverside complex on the west bank of the Chao Phraya that houses over 500 retailers, an extraordinary food hall modelled on a traditional Thai floating market, a dedicated luxury wing (ICONLUXE) featuring the first Thailand flagships of some of the world\'s most coveted brands, and floor-to-ceiling views of the river from almost every angle. The SookSiam basement hall is the highlight for food lovers — a massive, immaculately styled recreation of a Thai floating market with regional stalls from every province of Thailand serving dishes you genuinely cannot find anywhere else in Bangkok. A free shuttle boat runs from Saphan Taksin pier every 30 minutes. Allow a full half-day minimum.', topReview: '"ICON SIAM is genuinely unlike any other shopping mall I have visited anywhere in the world. The floating market food hall in the basement alone is worth the entire trip — the variety of authentic regional Thai food is staggering and everything we tried was excellent. The building itself is a jaw-dropping piece of architecture and the river views from the upper floors at sunset are some of the best in Bangkok. Completely unmissable." — Rachel P., Google Reviews ⭐⭐⭐⭐⭐' },
+    ],
     attractions: [
       { name: 'Grand Palace',       coords: [13.7500, 100.4913], type: 'Historic Site', note: 'Iconic royal palace complex & Wat Phra Kaew',          desc: 'The Grand Palace is the most visited and most important historic site in all of Thailand — a vast, walled complex of royal buildings, sacred temples, and ceremonial pavilions that has served as the seat of the Thai monarchy since King Rama I established Bangkok as the capital in 1782. The complex covers 218,000 square metres and contains dozens of distinct structures, each one a masterpiece of Thai craftsmanship: golden spires, sweeping tiered rooflines, exterior walls encrusted with millions of pieces of coloured glass mosaic, and interior murals that stretch for hundreds of metres depicting the full epic narrative of the Ramakien. At the heart of the complex sits Wat Phra Kaew — the Temple of the Emerald Buddha — which houses the most sacred Buddha image in all of Thailand, a single piece of green jade less than a metre tall, draped in seasonal royal robes that are changed by the King himself three times a year. A licensed guide is strongly recommended to unlock the full depth of what you are seeing.', topReview: '"Truly one of the great wonders of the entire continent of Asia. The level of detail on every single surface is completely mind-blowing — gold leaf, mirrored glass mosaic, ancient painted murals, intricate stone carvings everywhere you turn. Hiring a licensed guide was absolutely the right decision because the stories and context behind what you\'re looking at make the whole experience infinitely richer. A landmark that fully deserves its reputation." — Amanda S., TripAdvisor ⭐⭐⭐⭐⭐' },
       { name: 'Wat Pho',            coords: [13.7465, 100.4927], type: 'Temple',        note: 'Home of the giant Reclining Buddha',                   desc: 'Wat Pho is one of the oldest and most important temple complexes in Bangkok, predating the city itself, and it is home to the extraordinary Reclining Buddha — a 46-metre-long, 15-metre-high statue coated entirely in gold leaf that depicts the Buddha at the moment of entering Nirvana. The scale of the statue inside its purpose-built vihara hall is genuinely difficult to process until you are standing directly beside the feet, which alone are 5 metres tall and inlaid with 108 auspicious symbols in mother-of-pearl. Beyond the Reclining Buddha, the wider temple grounds are among the most beautiful in Bangkok — dozens of gilded chedis of varying heights line the courtyard paths, stone Chinese guardian statues stand at every gate, and the low pavilions are filled with bronze Buddha images from across Thai history. Wat Pho is also recognised as the birthplace of traditional Thai massage and houses an on-site school where you can book a session in the shaded massage pavilions.', topReview: '"The Reclining Buddha quite literally left me completely speechless when I walked into that hall — no photograph or description prepares you for the sheer scale of it when you are actually standing there next to it. The feet alone are taller than I am. The surrounding temple grounds are also strikingly beautiful and significantly less crowded than the Grand Palace next door. One of the most impressive things I saw during two weeks in Thailand." — Brian H., Google Reviews ⭐⭐⭐⭐⭐' },
@@ -526,7 +544,7 @@ const cities = {
 
 /* ── LOCALSTORAGE ── */
 // Track names of deleted built-in places so they stay hidden after reload
-const deletedBuiltins = { phuket: { restaurants: [], attractions: [] }, bangkok: { restaurants: [], attractions: [] } };
+const deletedBuiltins = { phuket: { restaurants: [], attractions: [], casuals: [] }, bangkok: { restaurants: [], attractions: [], casuals: [] } };
 
 function loadUserPlaces() {
   try {
@@ -536,6 +554,7 @@ function loadUserPlaces() {
       ['phuket', 'bangkok'].forEach(city => {
         if (data[city]?.restaurants) cities[city].restaurants.push(...data[city].restaurants);
         if (data[city]?.attractions) cities[city].attractions.push(...data[city].attractions);
+        if (data[city]?.casuals)     cities[city].casuals.push(...data[city].casuals);
       });
     }
     const del = localStorage.getItem('deletedBuiltins');
@@ -544,10 +563,12 @@ function loadUserPlaces() {
       ['phuket', 'bangkok'].forEach(city => {
         if (d[city]?.restaurants) deletedBuiltins[city].restaurants = d[city].restaurants;
         if (d[city]?.attractions) deletedBuiltins[city].attractions = d[city].attractions;
+        if (d[city]?.casuals)     deletedBuiltins[city].casuals     = d[city].casuals;
       });
       ['phuket', 'bangkok'].forEach(city => {
         cities[city].restaurants = cities[city].restaurants.filter(r => !deletedBuiltins[city].restaurants.includes(r.name));
         cities[city].attractions = cities[city].attractions.filter(a => !deletedBuiltins[city].attractions.includes(a.name));
+        cities[city].casuals     = cities[city].casuals.filter(c => !deletedBuiltins[city].casuals.includes(c.name));
       });
     }
   } catch(e) {}
@@ -559,6 +580,7 @@ function saveUserPlaces() {
     data[city] = {
       restaurants: cities[city].restaurants.filter(r => r._user),
       attractions: cities[city].attractions.filter(a => a._user),
+      casuals:     cities[city].casuals.filter(c => c._user),
     };
   });
   localStorage.setItem('userPlaces2', JSON.stringify(data));
@@ -615,6 +637,7 @@ const hotelIcon      = makeIcon('🏨', 36);
 const restaurantIcon = makeIcon('🍽', 28);
 const michelinIcon   = makeIcon('⭐', 30);
 const attractionIcon = makeIcon('🏛', 28);
+const casualIcon     = makeIcon('🌴', 28);
 const pinIcon        = makeIcon('📍', 28);
 
 /* ── STATE ── */
@@ -659,6 +682,15 @@ function buildCity(cityKey) {
     const idx = allMarkers.length;
     m.on('click', () => selectMarker(idx));
     allMarkers.push({ marker: m, data: { name: a.name, sub: a.type, dist: fmtDist(km), time: driveTime(km), desc: a.desc, topReview: a.topReview } });
+  });
+
+  // Casuals — indices after attractions
+  city.casuals.forEach((c, i) => {
+    const km = haversine(city.hotel.coords, c.coords);
+    const m  = L.marker(c.coords, { icon: casualIcon }).addTo(map);
+    const idx = allMarkers.length;
+    m.on('click', () => selectMarker(idx));
+    allMarkers.push({ marker: m, data: { name: c.name, sub: c.type, hours: c.hours, dist: fmtDist(km), time: driveTime(km), desc: c.desc, topReview: c.topReview } });
   });
 
   buildPanel(cityKey);
@@ -828,6 +860,53 @@ function buildPanel(cityKey) {
     wrapper.appendChild(actions);
     attrList.appendChild(wrapper);
   });
+
+  // Casuals
+  const casualList = document.getElementById('list-casuals');
+  casualList.innerHTML = '';
+  const casualOffset = 1 + city.restaurants.length + city.attractions.length;
+  city.casuals.forEach((c, i) => {
+    const markerIdx = casualOffset + i;
+    const km = haversine(city.hotel.coords, c.coords);
+
+    const wrapper = document.createElement('div');
+
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <span class="place-icon">🌴</span>
+      <div class="place-info">
+        <div class="place-name">${c.name}</div>
+        <div class="place-type">${c.type}</div>
+        ${c.hours ? `<div style="font-size:10px;color:#7a7a9a;margin-top:2px">🕐 ${c.hours}</div>` : ''}
+      </div>
+      <div class="place-meta">
+        <div class="place-dist">${fmtDist(km)}</div>
+        <div class="place-time">~${driveTime(km)}</div>
+      </div>
+    `;
+
+    const actions = document.createElement('div');
+    actions.className = 'place-actions';
+    actions.innerHTML = `
+      <button class="action-btn delete" onclick="deletePlace(event,'${cityKey}','casual',${i})">🗑 Delete</button>
+      ${c._user ? `<button class="action-btn move" onclick="movePlace(event,'${cityKey}','${otherCity}','casual',${i})">↔ Move to ${otherLabel}</button>` : ''}
+    `;
+
+    li.addEventListener('click', (e) => {
+      const isOpen = actions.classList.contains('visible');
+      document.querySelectorAll('.place-actions.visible').forEach(el => el.classList.remove('visible'));
+      document.querySelectorAll('.place-list li.selected').forEach(el => el.classList.remove('selected'));
+      if (!isOpen) {
+        actions.classList.add('visible');
+        li.classList.add('selected');
+      }
+      selectMarker(markerIdx);
+    });
+
+    wrapper.appendChild(li);
+    wrapper.appendChild(actions);
+    casualList.appendChild(wrapper);
+  });
 }
 
 function selectMarker(idx) {
@@ -861,11 +940,11 @@ function selectMarker(idx) {
 
 function deletePlace(e, cityKey, section, idx) {
   e.stopPropagation();
-  const list = section === 'restaurant' ? cities[cityKey].restaurants : cities[cityKey].attractions;
+  const listKey = section === 'restaurant' ? 'restaurants' : section === 'casual' ? 'casuals' : 'attractions';
+  const list = cities[cityKey][listKey];
   const place = list[idx];
   if (!place._user) {
-    // Track built-in deletion so it persists across reload
-    deletedBuiltins[cityKey][section === 'restaurant' ? 'restaurants' : 'attractions'].push(place.name);
+    deletedBuiltins[cityKey][listKey].push(place.name);
   }
   list.splice(idx, 1);
   saveUserPlaces();
@@ -874,8 +953,9 @@ function deletePlace(e, cityKey, section, idx) {
 
 function movePlace(e, fromCity, toCity, section, idx) {
   e.stopPropagation();
-  const fromList = section === 'restaurant' ? cities[fromCity].restaurants : cities[fromCity].attractions;
-  const toList   = section === 'restaurant' ? cities[toCity].restaurants   : cities[toCity].attractions;
+  const listKey  = section === 'restaurant' ? 'restaurants' : section === 'casual' ? 'casuals' : 'attractions';
+  const fromList = cities[fromCity][listKey];
+  const toList   = cities[toCity][listKey];
   const [place]  = fromList.splice(idx, 1);
   toList.push(place);
   saveUserPlaces();
@@ -899,8 +979,11 @@ function setType(t) {
   placeType = t;
   document.getElementById('type-restaurant').classList.toggle('active', t === 'restaurant');
   document.getElementById('type-attraction').classList.toggle('active', t === 'attraction');
-  document.getElementById('label-cuisine').textContent  = t === 'restaurant' ? 'Cuisine / Type' : 'Category';
-  document.getElementById('field-cuisine').placeholder  = t === 'restaurant' ? 'e.g. Thai, Street Food, Café' : 'e.g. Temple, Beach, Market';
+  document.getElementById('type-casual').classList.toggle('active', t === 'casual');
+  const labels = { restaurant: 'Cuisine / Type', attraction: 'Category', casual: 'Activity Type' };
+  const placeholders = { restaurant: 'e.g. Thai, Street Food, Café', attraction: 'e.g. Temple, Beach, Market', casual: 'e.g. Massage, Shopping, Sport' };
+  document.getElementById('label-cuisine').textContent  = labels[t];
+  document.getElementById('field-cuisine').placeholder  = placeholders[t];
   document.getElementById('michelin-row').style.display = t === 'restaurant' ? 'flex' : 'none';
 }
 
@@ -1035,6 +1118,8 @@ function savePlace() {
     cities[currentCity].hotel = { name, coords: pendingCoords, note: cuisine };
   } else if (placeType === 'restaurant') {
     cities[currentCity].restaurants.push({ name, coords: pendingCoords, cuisine, note, michelin: michelin || undefined, _user: true });
+  } else if (placeType === 'casual') {
+    cities[currentCity].casuals.push({ name, coords: pendingCoords, type: cuisine, note, _user: true });
   } else {
     cities[currentCity].attractions.push({ name, coords: pendingCoords, type: cuisine, note, _user: true });
   }
