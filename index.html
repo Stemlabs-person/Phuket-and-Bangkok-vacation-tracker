@@ -1106,6 +1106,71 @@ document.getElementById('field-maps-url').addEventListener('input', function() {
   }
 });
 
+function getApiKey() {
+  let key = localStorage.getItem('claudeApiKey');
+  if (!key) {
+    key = prompt('Enter your Anthropic API key (stored locally, used to auto-fill descriptions):');
+    if (key) localStorage.setItem('claudeApiKey', key.trim());
+  }
+  return key ? key.trim() : null;
+}
+
+async function autoFillPlaceInfo(place, type) {
+  const apiKey = getApiKey();
+  if (!apiKey) return;
+
+  const city = currentCity === 'phuket' ? 'Phuket, Thailand' : 'Bangkok, Thailand';
+  const category = type === 'restaurant' ? `restaurant (cuisine: ${place.cuisine})` :
+                   type === 'casual'     ? `activity/casual place (type: ${place.type})` :
+                                           `tourist attraction (type: ${place.type})`;
+
+  const prompt = `You are helping build a travel guide for a vacation to ${city}.
+Write 3 things about this place called "${place.name}", a ${category}${place.note ? ` — note: "${place.note}"` : ''}:
+
+1. DESCRIPTION: A rich, evocative paragraph (5–8 sentences) describing what this place is like — the atmosphere, what makes it special, what to order or do, best time to visit. Write in second person as if guiding a traveller.
+2. OPENING_HOURS: The typical opening hours in a short format like "Daily 9am–10pm" or "Mon–Sat 11am–3pm, 6–10pm". If unknown, give a plausible estimate.
+3. TOP_REVIEW: A single fabricated but realistic 4–5 star review in the style of Google Reviews or TripAdvisor — include a name, star rating, and vivid detail. Format: "<review text>" — Firstname L., Google Reviews ⭐⭐⭐⭐⭐
+
+Respond in EXACTLY this format with no other text:
+DESCRIPTION: <text>
+OPENING_HOURS: <text>
+TOP_REVIEW: <text>`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+
+    const descMatch   = text.match(/DESCRIPTION:\s*([\s\S]*?)(?=\nOPENING_HOURS:)/);
+    const hoursMatch  = text.match(/OPENING_HOURS:\s*(.+?)(?=\nTOP_REVIEW:|$)/);
+    const reviewMatch = text.match(/TOP_REVIEW:\s*([\s\S]*?)$/);
+
+    if (descMatch)   place.desc      = descMatch[1].trim();
+    if (hoursMatch)  place.hours     = hoursMatch[1].trim();
+    if (reviewMatch) place.topReview = reviewMatch[1].trim();
+
+    saveUserPlaces();
+    buildCity(currentCity);
+  } catch (err) {
+    console.warn('Auto-fill failed:', err);
+  }
+}
+
 function savePlace() {
   const name    = document.getElementById('field-name').value.trim();
   const cuisine = document.getElementById('field-cuisine').value.trim() || (placeType === 'restaurant' ? 'Restaurant' : 'Attraction');
@@ -1114,20 +1179,29 @@ function savePlace() {
 
   if (!name || !pendingCoords) return;
 
+  let newPlace = null;
+
   if (placeType === 'hotel') {
     cities[currentCity].hotel = { name, coords: pendingCoords, note: cuisine };
   } else if (placeType === 'restaurant') {
-    cities[currentCity].restaurants.push({ name, coords: pendingCoords, cuisine, note, michelin: michelin || undefined, _user: true });
+    newPlace = { name, coords: pendingCoords, cuisine, note, michelin: michelin || undefined, _user: true };
+    cities[currentCity].restaurants.push(newPlace);
   } else if (placeType === 'casual') {
-    cities[currentCity].casuals.push({ name, coords: pendingCoords, type: cuisine, note, _user: true });
+    newPlace = { name, coords: pendingCoords, type: cuisine, note, _user: true };
+    cities[currentCity].casuals.push(newPlace);
   } else {
-    cities[currentCity].attractions.push({ name, coords: pendingCoords, type: cuisine, note, _user: true });
+    newPlace = { name, coords: pendingCoords, type: cuisine, note, _user: true };
+    cities[currentCity].attractions.push(newPlace);
   }
 
   saveUserPlaces();
   if (pickingPin) { map.removeLayer(pickingPin); pickingPin = null; }
   cancelAddPlace();
   buildCity(currentCity);
+
+  if (newPlace && placeType !== 'hotel') {
+    autoFillPlaceInfo(newPlace, placeType);
+  }
 }
 
 /* ── TRAFFIC REFRESH every 30s ── */
