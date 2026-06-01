@@ -371,6 +371,210 @@
     }
     #modal-save:hover    { background: #5a95f5; }
     #modal-save:disabled { background: #2a2a4a; color: #6060a0; cursor: default; }
+
+    /* ── Planning Button ── */
+    #plan-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      background: #6a3d9a;
+      color: #fff;
+      transition: all 0.2s;
+    }
+    #plan-btn:hover { background: #7d4fb3; }
+    #plan-btn.active { background: #9b59d0; }
+
+    /* ── Planning Panel ── */
+    #planning-panel {
+      display: none;
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 720px;
+      max-width: calc(100vw - 40px);
+      max-height: calc(100vh - 80px);
+      background: rgba(10, 10, 28, 0.98);
+      border: 1px solid #2a2a4a;
+      border-radius: 14px;
+      z-index: 1002;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.8);
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #planning-panel.visible { display: flex; }
+
+    #planning-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: #12122e;
+      border-bottom: 1px solid #2a2a4a;
+      flex-shrink: 0;
+    }
+    #planning-header h2 { font-size: 15px; font-weight: 700; color: #e8e8f0; }
+    #planning-close {
+      background: none; border: none; color: #5050a0;
+      font-size: 18px; cursor: pointer; line-height: 1;
+    }
+    #planning-close:hover { color: #e8e8f0; }
+
+    .plan-tabs {
+      display: flex;
+      border-bottom: 1px solid #2a2a4a;
+      background: #0f0f23;
+      flex-shrink: 0;
+    }
+    .plan-tab {
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #6060a0;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .plan-tab.active { color: #e8e8f0; border-bottom-color: #6a3d9a; }
+    .plan-tab:hover { color: #a0a0c0; }
+
+    #planning-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 18px;
+    }
+    #planning-body::-webkit-scrollbar { width: 4px; }
+    #planning-body::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 2px; }
+
+    /* Notes tab */
+    #notes-area {
+      width: 100%;
+      min-height: 300px;
+      background: #1a1a3e;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 12px;
+      color: #e8e8f0;
+      font-size: 13px;
+      font-family: inherit;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+    }
+    #notes-area:focus { border-color: #6a3d9a; }
+
+    /* Schedule tab */
+    .schedule-city-header {
+      font-size: 13px;
+      font-weight: 700;
+      color: #9b59d0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 16px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #2a2a4a;
+    }
+    .schedule-city-header:first-child { margin-top: 0; }
+
+    .day-block {
+      margin-bottom: 10px;
+      background: #12122a;
+      border: 1px solid #1e1e3a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .day-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: #1a1a3e;
+      cursor: pointer;
+      user-select: none;
+    }
+    .day-header span { font-size: 13px; font-weight: 600; color: #c0c0e0; }
+    .day-header .day-toggle { color: #5050a0; font-size: 12px; }
+    .day-content { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+    .day-content.collapsed { display: none; }
+
+    .slot-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .slot-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #5050a0;
+      width: 64px;
+      flex-shrink: 0;
+      text-transform: uppercase;
+    }
+    .slot-input {
+      flex: 1;
+      background: #1a1a3e;
+      border: 1px solid #2a2a4a;
+      border-radius: 6px;
+      padding: 6px 8px;
+      color: #e8e8f0;
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+    }
+    .slot-input:focus { border-color: #6a3d9a; }
+    .slot-pick {
+      background: #1e1e3e;
+      border: 1px solid #2a2a4a;
+      border-radius: 6px;
+      padding: 5px 8px;
+      color: #a0a0c0;
+      font-size: 11px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .slot-pick:hover { background: #2a2a4e; color: #e8e8f0; }
+
+    /* Place picker dropdown */
+    .place-picker-dropdown {
+      position: absolute;
+      background: #1a1a3e;
+      border: 1px solid #4a4a8a;
+      border-radius: 8px;
+      z-index: 1100;
+      max-height: 220px;
+      overflow-y: auto;
+      width: 260px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    }
+    .place-picker-dropdown div {
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #c0c0e0;
+      cursor: pointer;
+      border-bottom: 1px solid #2a2a4a;
+    }
+    .place-picker-dropdown div:hover { background: #2a2a5a; color: #fff; }
+    .place-picker-dropdown div:last-child { border-bottom: none; }
+
+    #ai-schedule-btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #6a3d9a;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 16px;
+      transition: background 0.15s;
+    }
+    #ai-schedule-btn:hover { background: #7d4fb3; }
+    #ai-schedule-btn:disabled { background: #2a2a4a; color: #6060a0; cursor: default; }
   </style>
 </head>
 <body>
@@ -380,6 +584,7 @@
   <button class="city-btn active"   id="btn-phuket"  onclick="switchCity('phuket')">🏝 Phuket</button>
   <button class="city-btn inactive" id="btn-bangkok" onclick="switchCity('bangkok')">🏙 Bangkok</button>
   <button id="add-btn" onclick="startAddPlace()">+ Add Place</button>
+  <button id="plan-btn" onclick="togglePlanning()">📋 Planning</button>
   <div id="meal-key" style="display:flex;align-items:center;gap:6px;padding:4px 10px;background:#1a1a3a;border:1px solid #2a2a4a;border-radius:20px;font-size:11px">
     <span style="color:#888;font-weight:600;letter-spacing:0.05em">MEALS:</span>
     <span style="padding:2px 8px;border-radius:10px;background:#f4a26122;border:1px solid #f4a26155;color:#f4a261;font-weight:600">Breakfast</span>
@@ -467,6 +672,29 @@
       <label class="michelin-label" for="michelin-check">⭐ Michelin Star</label>
     </div>
     <button id="modal-save" disabled onclick="savePlace()">Save Place</button>
+  </div>
+</div>
+
+<!-- Planning Panel -->
+<div id="planning-panel">
+  <div id="planning-header">
+    <h2>📋 Trip Planning</h2>
+    <button id="planning-close" onclick="togglePlanning()">✕</button>
+  </div>
+  <div class="plan-tabs">
+    <div class="plan-tab active" id="tab-schedule" onclick="switchPlanTab('schedule')">🗓 Schedule</div>
+    <div class="plan-tab" id="tab-notes" onclick="switchPlanTab('notes')">📝 Notes</div>
+  </div>
+  <div id="planning-body">
+    <!-- Schedule view -->
+    <div id="plan-schedule">
+      <button id="ai-schedule-btn" onclick="generateAISchedule()">✨ Auto-generate schedule with AI</button>
+      <div id="schedule-days"></div>
+    </div>
+    <!-- Notes view -->
+    <div id="plan-notes" style="display:none">
+      <textarea id="notes-area" placeholder="Jot down anything — things to pack, reminders, ideas…"></textarea>
+    </div>
   </div>
 </div>
 
@@ -1210,6 +1438,230 @@ setInterval(() => {
     secs = 30;
   }
 }, 1000);
+
+/* ── PLANNING ── */
+let planningOpen = false;
+let activePlanTab = 'schedule';
+let activePicker = null;
+
+const TRIP_DAYS = [
+  ...Array.from({length:7},(_,i)=>({city:'phuket', day:i+1, label:`Phuket — Day ${i+1}`})),
+  ...Array.from({length:7},(_,i)=>({city:'bangkok', day:i+1, label:`Bangkok — Day ${i+1}`})),
+];
+
+const SLOTS = ['Morning','Lunch','Afternoon','Dinner','Evening'];
+
+function loadPlanningData() {
+  try {
+    const s = localStorage.getItem('planningSchedule');
+    return s ? JSON.parse(s) : {};
+  } catch(e) { return {}; }
+}
+
+function savePlanningData(data) {
+  localStorage.setItem('planningSchedule', JSON.stringify(data));
+}
+
+function loadNotes() {
+  return localStorage.getItem('planningNotes') || '';
+}
+
+function togglePlanning() {
+  planningOpen = !planningOpen;
+  document.getElementById('planning-panel').classList.toggle('visible', planningOpen);
+  document.getElementById('plan-btn').classList.toggle('active', planningOpen);
+  if (planningOpen) {
+    buildSchedule();
+    document.getElementById('notes-area').value = loadNotes();
+  }
+}
+
+function switchPlanTab(tab) {
+  activePlanTab = tab;
+  document.getElementById('tab-schedule').classList.toggle('active', tab === 'schedule');
+  document.getElementById('tab-notes').classList.toggle('active', tab === 'notes');
+  document.getElementById('plan-schedule').style.display = tab === 'schedule' ? 'block' : 'none';
+  document.getElementById('plan-notes').style.display    = tab === 'notes'    ? 'block' : 'none';
+}
+
+document.getElementById('notes-area').addEventListener('input', function() {
+  localStorage.setItem('planningNotes', this.value);
+});
+
+function buildSchedule() {
+  const data = loadPlanningData();
+  const container = document.getElementById('schedule-days');
+  container.innerHTML = '';
+
+  let lastCity = null;
+  TRIP_DAYS.forEach(({city, day, label}) => {
+    if (city !== lastCity) {
+      const ch = document.createElement('div');
+      ch.className = 'schedule-city-header';
+      ch.textContent = city === 'phuket' ? '🏝 Phuket — Week 1' : '🏙 Bangkok — Week 2';
+      container.appendChild(ch);
+      lastCity = city;
+    }
+
+    const key = `${city}_${day}`;
+    const dayData = data[key] || {};
+
+    const block = document.createElement('div');
+    block.className = 'day-block';
+
+    const header = document.createElement('div');
+    header.className = 'day-header';
+    header.innerHTML = `<span>${label}</span><span class="day-toggle">▼</span>`;
+    header.addEventListener('click', () => {
+      const content = block.querySelector('.day-content');
+      content.classList.toggle('collapsed');
+      header.querySelector('.day-toggle').textContent = content.classList.contains('collapsed') ? '▶' : '▼';
+    });
+
+    const content = document.createElement('div');
+    content.className = 'day-content' + (day > 1 ? ' collapsed' : '');
+    if (day > 1) header.querySelector('.day-toggle').textContent = '▶';
+
+    SLOTS.forEach(slot => {
+      const row = document.createElement('div');
+      row.className = 'slot-row';
+
+      const lbl = document.createElement('div');
+      lbl.className = 'slot-label';
+      lbl.textContent = slot;
+
+      const input = document.createElement('input');
+      input.className = 'slot-input';
+      input.type = 'text';
+      input.placeholder = `${slot} plans…`;
+      input.value = dayData[slot] || '';
+      input.addEventListener('change', () => {
+        const d = loadPlanningData();
+        if (!d[key]) d[key] = {};
+        d[key][slot] = input.value;
+        savePlanningData(d);
+      });
+
+      const pickBtn = document.createElement('button');
+      pickBtn.className = 'slot-pick';
+      pickBtn.textContent = '+ Place';
+      pickBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showPlacePicker(e, city, input);
+      });
+
+      row.appendChild(lbl);
+      row.appendChild(input);
+      row.appendChild(pickBtn);
+      content.appendChild(row);
+    });
+
+    block.appendChild(header);
+    block.appendChild(content);
+    container.appendChild(block);
+  });
+}
+
+function showPlacePicker(e, city, inputEl) {
+  document.querySelectorAll('.place-picker-dropdown').forEach(el => el.remove());
+
+  const dropdown = document.createElement('div');
+  dropdown.className = 'place-picker-dropdown';
+
+  const allPlaces = [
+    ...cities[city].restaurants.map(r => ({ name: r.name, icon: r.michelin ? '⭐' : '🍽' })),
+    ...cities[city].attractions.map(a => ({ name: a.name, icon: '🏛' })),
+    ...cities[city].casuals.map(c =>     ({ name: c.name, icon: '🌴' })),
+  ];
+
+  allPlaces.forEach(p => {
+    const item = document.createElement('div');
+    item.textContent = `${p.icon} ${p.name}`;
+    item.addEventListener('click', () => {
+      inputEl.value = inputEl.value ? inputEl.value + ', ' + p.name : p.name;
+      inputEl.dispatchEvent(new Event('change'));
+      dropdown.remove();
+    });
+    dropdown.appendChild(item);
+  });
+
+  const rect = e.target.getBoundingClientRect();
+  dropdown.style.position = 'fixed';
+  dropdown.style.top  = (rect.bottom + 4) + 'px';
+  dropdown.style.left = (rect.left - 160) + 'px';
+  document.body.appendChild(dropdown);
+
+  setTimeout(() => document.addEventListener('click', function handler() {
+    dropdown.remove();
+    document.removeEventListener('click', handler);
+  }), 10);
+}
+
+async function generateAISchedule() {
+  const apiKey = getApiKey();
+  if (!apiKey) return;
+
+  const btn = document.getElementById('ai-schedule-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating…';
+
+  const phuketPlaces = [
+    ...cities.phuket.restaurants.map(r => r.name),
+    ...cities.phuket.attractions.map(a => a.name),
+    ...cities.phuket.casuals.map(c => c.name),
+  ].join(', ');
+
+  const bangkokPlaces = [
+    ...cities.bangkok.restaurants.map(r => r.name),
+    ...cities.bangkok.attractions.map(a => a.name),
+    ...cities.bangkok.casuals.map(c => c.name),
+  ].join(', ');
+
+  const promptText = `Create a 7-day itinerary for Phuket and a 7-day itinerary for Bangkok for a vacation.
+
+Phuket places available: ${phuketPlaces}
+Bangkok places available: ${bangkokPlaces}
+
+Return ONLY a JSON object in this exact format, no other text:
+{
+  "phuket_1": {"Morning":"...","Lunch":"...","Afternoon":"...","Dinner":"...","Evening":"..."},
+  "phuket_2": {"Morning":"...","Lunch":"...","Afternoon":"...","Dinner":"...","Evening":"..."},
+  ...through phuket_7,
+  "bangkok_1": {"Morning":"...","Lunch":"...","Afternoon":"...","Dinner":"...","Evening":"..."},
+  ...through bangkok_7
+}
+
+Use the place names provided where relevant. Keep each slot brief (one place or activity).`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] }),
+      }
+    );
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+    const data = await res.json();
+    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    text = text.replace(/```json|```/g, '').trim();
+    const schedule = JSON.parse(text);
+    savePlanningData(schedule);
+    buildSchedule();
+    // expand all days
+    document.querySelectorAll('.day-content').forEach(el => {
+      el.classList.remove('collapsed');
+      const toggle = el.previousSibling?.querySelector('.day-toggle');
+      if (toggle) toggle.textContent = '▼';
+    });
+  } catch(err) {
+    alert('AI schedule error: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✨ Auto-generate schedule with AI';
+  }
+}
 
 /* ── BOOT ── */
 buildCity('phuket');
