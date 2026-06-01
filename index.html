@@ -1107,10 +1107,10 @@ document.getElementById('field-maps-url').addEventListener('input', function() {
 });
 
 function getApiKey() {
-  let key = localStorage.getItem('claudeApiKey');
+  let key = localStorage.getItem('geminiApiKey');
   if (!key) {
-    key = prompt('Enter your Anthropic API key (stored locally, used to auto-fill descriptions):');
-    if (key) localStorage.setItem('claudeApiKey', key.trim());
+    key = prompt('Enter your Google Gemini API key (free at aistudio.google.com — stored locally):');
+    if (key) localStorage.setItem('geminiApiKey', key.trim());
   }
   return key ? key.trim() : null;
 }
@@ -1124,7 +1124,7 @@ async function autoFillPlaceInfo(place, type) {
                    type === 'casual'     ? `activity/casual place (type: ${place.type})` :
                                            `tourist attraction (type: ${place.type})`;
 
-  const prompt = `You are helping build a travel guide for a vacation to ${city}.
+  const promptText = `You are helping build a travel guide for a vacation to ${city}.
 Write 3 things about this place called "${place.name}", a ${category}${place.note ? ` — note: "${place.note}"` : ''}:
 
 1. DESCRIPTION: A rich, evocative paragraph (5–8 sentences) describing what this place is like — the atmosphere, what makes it special, what to order or do, best time to visit. Write in second person as if guiding a traveller.
@@ -1137,24 +1137,18 @@ OPENING_HOURS: <text>
 TOP_REVIEW: <text>`;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] }),
+      }
+    );
 
     if (!res.ok) throw new Error(`API error ${res.status}`);
     const data = await res.json();
-    const text = data.content?.[0]?.text || '';
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     const descMatch   = text.match(/DESCRIPTION:\s*([\s\S]*?)(?=\nOPENING_HOURS:)/);
     const hoursMatch  = text.match(/OPENING_HOURS:\s*(.+?)(?=\nTOP_REVIEW:|$)/);
