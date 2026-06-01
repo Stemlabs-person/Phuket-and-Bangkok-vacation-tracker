@@ -154,18 +154,28 @@
     .place-dist { font-size: 12px; font-weight: 700; color: #4285F4; }
     .place-time { font-size: 11px; color: #52b788; margin-top: 2px; }
 
-    .delete-btn {
-      background: none;
-      border: none;
-      color: #ff6b6b;
-      cursor: pointer;
-      font-size: 14px;
-      padding: 2px 4px;
-      opacity: 0;
-      transition: opacity 0.15s;
-      flex-shrink: 0;
+    .place-actions {
+      display: none;
+      padding: 6px 14px 10px 14px;
+      gap: 8px;
+      background: #12122a;
+      border-bottom: 1px solid #1e1e3a;
     }
-    .place-list li:hover .delete-btn { opacity: 1; }
+    .place-actions.visible { display: flex; }
+    .action-btn {
+      flex: 1;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .action-btn.delete { background: #3d1a1a; color: #ff6b6b; }
+    .action-btn.delete:hover { background: #5a2020; }
+    .action-btn.move { background: #1a2a3d; color: #4285F4; }
+    .action-btn.move:hover { background: #1e3552; }
 
     .custom-popup .leaflet-popup-content-wrapper {
       background: #0f0f23;
@@ -289,7 +299,8 @@
       transition: opacity 0.15s;
       flex-shrink: 0;
     }
-    #list-hotel li:hover .edit-hotel-btn { opacity: 1; }
+    #list-hotel li:hover .edit-hotel-btn,
+    #list-hotel li.selected .edit-hotel-btn { opacity: 1; }
 
     #coords-display {
       background: #1a1a3e;
@@ -458,15 +469,31 @@ const cities = {
 };
 
 /* ── LOCALSTORAGE ── */
+// Track names of deleted built-in places so they stay hidden after reload
+const deletedBuiltins = { phuket: { restaurants: [], attractions: [] }, bangkok: { restaurants: [], attractions: [] } };
+
 function loadUserPlaces() {
   try {
     const saved = localStorage.getItem('userPlaces2');
-    if (!saved) return;
-    const data = JSON.parse(saved);
-    ['phuket', 'bangkok'].forEach(city => {
-      if (data[city]?.restaurants) cities[city].restaurants.push(...data[city].restaurants);
-      if (data[city]?.attractions) cities[city].attractions.push(...data[city].attractions);
-    });
+    if (saved) {
+      const data = JSON.parse(saved);
+      ['phuket', 'bangkok'].forEach(city => {
+        if (data[city]?.restaurants) cities[city].restaurants.push(...data[city].restaurants);
+        if (data[city]?.attractions) cities[city].attractions.push(...data[city].attractions);
+      });
+    }
+    const del = localStorage.getItem('deletedBuiltins');
+    if (del) {
+      const d = JSON.parse(del);
+      ['phuket', 'bangkok'].forEach(city => {
+        if (d[city]?.restaurants) deletedBuiltins[city].restaurants = d[city].restaurants;
+        if (d[city]?.attractions) deletedBuiltins[city].attractions = d[city].attractions;
+      });
+      ['phuket', 'bangkok'].forEach(city => {
+        cities[city].restaurants = cities[city].restaurants.filter(r => !deletedBuiltins[city].restaurants.includes(r.name));
+        cities[city].attractions = cities[city].attractions.filter(a => !deletedBuiltins[city].attractions.includes(a.name));
+      });
+    }
   } catch(e) {}
 }
 
@@ -479,6 +506,7 @@ function saveUserPlaces() {
     };
   });
   localStorage.setItem('userPlaces2', JSON.stringify(data));
+  localStorage.setItem('deletedBuiltins', JSON.stringify(deletedBuiltins));
 }
 
 loadUserPlaces();
@@ -601,6 +629,9 @@ function popupHtml(name, note, dist, time, sub) {
 function buildPanel(cityKey) {
   const city = cities[cityKey];
 
+  const otherCity = cityKey === 'phuket' ? 'bangkok' : 'phuket';
+  const otherLabel = cityKey === 'phuket' ? 'Bangkok' : 'Phuket';
+
   // Hotel
   const hotelList = document.getElementById('list-hotel');
   hotelList.innerHTML = '';
@@ -629,6 +660,8 @@ function buildPanel(cityKey) {
     const icon  = r.michelin ? '⭐' : '🍽';
     const sub   = r.michelin ? `⭐ Michelin Star · ${r.cuisine}` : r.cuisine;
 
+    const wrapper = document.createElement('div');
+
     const li = document.createElement('li');
     li.innerHTML = `
       <span class="place-icon">${icon}</span>
@@ -640,10 +673,29 @@ function buildPanel(cityKey) {
         <div class="place-dist">${fmtDist(km)}</div>
         <div class="place-time">~${driveTime(km, tf)}</div>
       </div>
-      ${r._user ? `<button class="delete-btn" title="Remove" onclick="deletePlace(event,'${cityKey}','restaurant',${i})">✕</button>` : ''}
     `;
-    li.addEventListener('click', () => selectMarker(markerIdx));
-    resList.appendChild(li);
+
+    const actions = document.createElement('div');
+    actions.className = 'place-actions';
+    actions.innerHTML = `
+      <button class="action-btn delete" onclick="deletePlace(event,'${cityKey}','restaurant',${i})">🗑 Delete</button>
+      ${r._user ? `<button class="action-btn move" onclick="movePlace(event,'${cityKey}','${otherCity}','restaurant',${i})">↔ Move to ${otherLabel}</button>` : ''}
+    `;
+
+    li.addEventListener('click', (e) => {
+      const isOpen = actions.classList.contains('visible');
+      document.querySelectorAll('.place-actions.visible').forEach(el => el.classList.remove('visible'));
+      document.querySelectorAll('.place-list li.selected').forEach(el => el.classList.remove('selected'));
+      if (!isOpen) {
+        actions.classList.add('visible');
+        li.classList.add('selected');
+      }
+      selectMarker(markerIdx);
+    });
+
+    wrapper.appendChild(li);
+    wrapper.appendChild(actions);
+    resList.appendChild(wrapper);
   });
 
   // Attractions
@@ -654,6 +706,8 @@ function buildPanel(cityKey) {
     const markerIdx = attrOffset + i;
     const km = haversine(city.hotel.coords, a.coords);
     const tf = 1;
+
+    const wrapper = document.createElement('div');
 
     const li = document.createElement('li');
     li.innerHTML = `
@@ -666,10 +720,29 @@ function buildPanel(cityKey) {
         <div class="place-dist">${fmtDist(km)}</div>
         <div class="place-time">~${driveTime(km, tf)}</div>
       </div>
-      ${a._user ? `<button class="delete-btn" title="Remove" onclick="deletePlace(event,'${cityKey}','attraction',${i})">✕</button>` : ''}
     `;
-    li.addEventListener('click', () => selectMarker(markerIdx));
-    attrList.appendChild(li);
+
+    const actions = document.createElement('div');
+    actions.className = 'place-actions';
+    actions.innerHTML = `
+      <button class="action-btn delete" onclick="deletePlace(event,'${cityKey}','attraction',${i})">🗑 Delete</button>
+      ${a._user ? `<button class="action-btn move" onclick="movePlace(event,'${cityKey}','${otherCity}','attraction',${i})">↔ Move to ${otherLabel}</button>` : ''}
+    `;
+
+    li.addEventListener('click', (e) => {
+      const isOpen = actions.classList.contains('visible');
+      document.querySelectorAll('.place-actions.visible').forEach(el => el.classList.remove('visible'));
+      document.querySelectorAll('.place-list li.selected').forEach(el => el.classList.remove('selected'));
+      if (!isOpen) {
+        actions.classList.add('visible');
+        li.classList.add('selected');
+      }
+      selectMarker(markerIdx);
+    });
+
+    wrapper.appendChild(li);
+    wrapper.appendChild(actions);
+    attrList.appendChild(wrapper);
   });
 }
 
@@ -682,10 +755,25 @@ function selectMarker(idx) {
 
 function deletePlace(e, cityKey, section, idx) {
   e.stopPropagation();
-  if (section === 'restaurant') cities[cityKey].restaurants.splice(idx, 1);
-  else                          cities[cityKey].attractions.splice(idx, 1);
+  const list = section === 'restaurant' ? cities[cityKey].restaurants : cities[cityKey].attractions;
+  const place = list[idx];
+  if (!place._user) {
+    // Track built-in deletion so it persists across reload
+    deletedBuiltins[cityKey][section === 'restaurant' ? 'restaurants' : 'attractions'].push(place.name);
+  }
+  list.splice(idx, 1);
   saveUserPlaces();
   buildCity(cityKey);
+}
+
+function movePlace(e, fromCity, toCity, section, idx) {
+  e.stopPropagation();
+  const fromList = section === 'restaurant' ? cities[fromCity].restaurants : cities[fromCity].attractions;
+  const toList   = section === 'restaurant' ? cities[toCity].restaurants   : cities[toCity].attractions;
+  const [place]  = fromList.splice(idx, 1);
+  toList.push(place);
+  saveUserPlaces();
+  buildCity(currentCity);
 }
 
 /* ── CITY SWITCH ── */
