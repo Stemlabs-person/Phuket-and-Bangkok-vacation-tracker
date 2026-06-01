@@ -348,6 +348,12 @@
   <button class="city-btn active"   id="btn-phuket"  onclick="switchCity('phuket')">🏝 Phuket</button>
   <button class="city-btn inactive" id="btn-bangkok" onclick="switchCity('bangkok')">🏙 Bangkok</button>
   <button id="add-btn" onclick="startAddPlace()">+ Add Place</button>
+  <div id="meal-key" style="display:flex;align-items:center;gap:6px;padding:4px 10px;background:#1a1a3a;border:1px solid #2a2a4a;border-radius:20px;font-size:11px">
+    <span style="color:#888;font-weight:600;letter-spacing:0.05em">MEALS:</span>
+    <span style="padding:2px 8px;border-radius:10px;background:#f4a26122;border:1px solid #f4a26155;color:#f4a261;font-weight:600">Breakfast</span>
+    <span style="padding:2px 8px;border-radius:10px;background:#52b78822;border:1px solid #52b78855;color:#52b788;font-weight:600">Lunch</span>
+    <span style="padding:2px 8px;border-radius:10px;background:#9b8ec422;border:1px solid #9b8ec455;color:#9b8ec4;font-weight:600">Dinner</span>
+  </div>
   <div id="traffic-badge">
     <div id="traffic-dot"></div>
     <span>Traffic live · refreshes in</span>
@@ -429,20 +435,20 @@ const cities = {
       note: 'Your base in Bang Tao',
     },
     restaurants: [
-      { name: 'Blue Elephant',         coords: [7.8841, 98.3921],       cuisine: 'Royal Thai Cuisine',   note: 'Michelin-starred royal Thai dining in a colonial mansion, Phuket Town', michelin: true },
-      { name: 'Roti Chaofa',           coords: [7.8764, 98.3748],       cuisine: 'Street Food',          note: 'Famous roti on Chaofa West Road, Phuket Town' },
-      { name: 'Khao Tom Dibuk',        coords: [7.8865, 98.3898],       cuisine: 'Thai / Rice Porridge', note: 'Late-night khao tom on Dibuk Road, Phuket Town', michelin: true },
-      { name: 'One Chun Café',         coords: [7.8854, 98.3914],       cuisine: 'Local Thai',           note: 'Heritage Phuket Town gem' },
-      { name: 'Phuketique Coffee Bar', coords: [7.8858, 98.3905],       cuisine: 'Café / Coffee',        note: 'Specialty coffee in a Phuket Town shophouse' },
-      { name: 'Go Benz Rice Porridge', coords: [7.8847328, 98.3825828], cuisine: 'Thai / Rice Porridge', note: 'Popular rice porridge spot in Phuket' },
-      { name: 'Chuan Chim',            coords: [7.8828319, 98.3928032], cuisine: 'Thai',                 note: 'Local favourite in Phuket Town' },
-      { name: 'O Tao Bang Niao',       coords: [7.8764639, 98.3936422], cuisine: 'Thai',                 note: 'Local spot in Bang Niao, Phuket Town' },
-      { name: 'Tatonka',               coords: [7.9880, 98.3012],       cuisine: 'Breakfast / International', note: 'Casual all-day café near Laguna — great eggs, smoothies & coffee for a morning start near Banyan Tree' },
-      { name: 'Croissant & Co',        coords: [7.9921, 98.2983],       cuisine: 'Café / Bakery',        note: 'Flaky pastries and strong espresso — popular breakfast stop in the Laguna area' },
-      { name: 'Laguna Restaurant',     coords: [7.9906, 98.3028],       cuisine: 'Thai / International', note: 'Lunch spot within the Laguna complex, breezy poolside setting next to Banyan Tree' },
-      { name: 'Trisara PRU',           coords: [8.0513, 98.2817],       cuisine: 'Farm-to-Table Thai',   note: 'Michelin-starred farm-to-table dining — the finest lunch/dinner near Phuket\'s north, 15 min from Banyan Tree', michelin: true },
-      { name: 'Siam Supper Club',      coords: [7.9875, 98.3000],       cuisine: 'Steakhouse / Grill',   note: 'Upscale dinner spot beloved by expats near Laguna — great steaks, cocktails & lively atmosphere' },
-      { name: 'Acqua Restaurant',      coords: [7.9295, 98.2815],       cuisine: 'Italian / Seafood',    note: 'Cliff-top fine-dining dinner near Kamala with sweeping sea views, about 20 min from Banyan Tree', michelin: true },
+      { name: 'Blue Elephant',         coords: [7.8841, 98.3921],       cuisine: 'Royal Thai Cuisine',   note: 'Michelin-starred royal Thai dining in a colonial mansion, Phuket Town', michelin: true, meals: ['lunch','dinner'],   hours: 'Mon–Sat 11:30am–2:30pm, 6:30–10:30pm' },
+      { name: 'Roti Chaofa',           coords: [7.8764, 98.3748],       cuisine: 'Street Food',          note: 'Famous roti on Chaofa West Road, Phuket Town',                                                                meals: ['breakfast','lunch'], hours: 'Daily 7am–2pm' },
+      { name: 'Khao Tom Dibuk',        coords: [7.8865, 98.3898],       cuisine: 'Thai / Rice Porridge', note: 'Late-night khao tom on Dibuk Road, Phuket Town',                                                              michelin: true, meals: ['dinner'],              hours: 'Daily 6pm–2am' },
+      { name: 'One Chun Café',         coords: [7.8854, 98.3914],       cuisine: 'Local Thai',           note: 'Heritage Phuket Town gem',                                                                                    meals: ['breakfast','lunch'], hours: 'Mon–Sat 8am–4pm' },
+      { name: 'Phuketique Coffee Bar', coords: [7.8858, 98.3905],       cuisine: 'Café / Coffee',        note: 'Specialty coffee in a Phuket Town shophouse',                                                                 meals: ['breakfast'],         hours: 'Daily 8am–5pm' },
+      { name: 'Go Benz Rice Porridge', coords: [7.8847328, 98.3825828], cuisine: 'Thai / Rice Porridge', note: 'Popular rice porridge spot in Phuket',                                                                        meals: ['breakfast'],         hours: 'Daily 6am–12pm' },
+      { name: 'Chuan Chim',            coords: [7.8828319, 98.3928032], cuisine: 'Thai',                 note: 'Local favourite in Phuket Town',                                                                              meals: ['lunch','dinner'],    hours: 'Daily 11am–9pm' },
+      { name: 'O Tao Bang Niao',       coords: [7.8764639, 98.3936422], cuisine: 'Thai',                 note: 'Local spot in Bang Niao, Phuket Town',                                                                        meals: ['lunch','dinner'],    hours: 'Daily 10am–8pm' },
+      { name: 'Tatonka',               coords: [7.9880, 98.3012],       cuisine: 'Breakfast / International', note: 'Casual all-day café near Laguna — great eggs, smoothies & coffee for a morning start near Banyan Tree',  meals: ['breakfast','lunch'], hours: 'Daily 7:30am–3pm' },
+      { name: 'Croissant & Co',        coords: [7.9921, 98.2983],       cuisine: 'Café / Bakery',        note: 'Flaky pastries and strong espresso — popular breakfast stop in the Laguna area',                             meals: ['breakfast'],         hours: 'Daily 7am–2pm' },
+      { name: 'Laguna Restaurant',     coords: [7.9906, 98.3028],       cuisine: 'Thai / International', note: 'Lunch spot within the Laguna complex, breezy poolside setting next to Banyan Tree',                          meals: ['lunch'],             hours: 'Daily 11am–5pm' },
+      { name: 'Trisara PRU',           coords: [8.0513, 98.2817],       cuisine: 'Farm-to-Table Thai',   note: 'Michelin-starred farm-to-table dining — the finest lunch/dinner near Phuket\'s north, 15 min from Banyan Tree', michelin: true, meals: ['lunch','dinner'], hours: 'Tue–Sun 12pm–2pm, 6:30–10pm' },
+      { name: 'Siam Supper Club',      coords: [7.9875, 98.3000],       cuisine: 'Steakhouse / Grill',   note: 'Upscale dinner spot beloved by expats near Laguna — great steaks, cocktails & lively atmosphere',             meals: ['dinner'],            hours: 'Daily 6pm–12am' },
+      { name: 'Acqua Restaurant',      coords: [7.9295, 98.2815],       cuisine: 'Italian / Seafood',    note: 'Cliff-top fine-dining dinner near Kamala with sweeping sea views, about 20 min from Banyan Tree',             michelin: true, meals: ['dinner'], hours: 'Daily 6pm–10:30pm' },
     ],
     attractions: [
       { name: 'Big Buddha',       coords: [7.8274, 98.3094], type: 'Landmark',   note: 'Giant white marble Buddha, panoramic views' },
@@ -462,7 +468,7 @@ const cities = {
       note: 'Your base on Sukhumvit Soi 24',
     },
     restaurants: [
-      { name: 'Blue Elephant', coords: [13.7217, 100.5140], cuisine: 'Royal Thai Cuisine', note: 'Michelin-starred royal Thai dining in a heritage mansion', michelin: true },
+      { name: 'Blue Elephant', coords: [13.7217, 100.5140], cuisine: 'Royal Thai Cuisine', note: 'Michelin-starred royal Thai dining in a heritage mansion', michelin: true, meals: ['lunch','dinner'], hours: 'Mon–Fri 11:30am–2:30pm, 6:30–10:30pm; Sat–Sun 11am–2:30pm, 6:30–10:30pm' },
     ],
     attractions: [
       { name: 'Grand Palace',       coords: [13.7500, 100.4913], type: 'Historic Site', note: 'Iconic royal palace complex & Wat Phra Kaew' },
@@ -599,7 +605,7 @@ function buildCity(cityKey) {
     const sub  = r.michelin ? `⭐ Michelin Star · ${r.cuisine}` : r.cuisine;
     const m = L.marker(r.coords, { icon })
       .addTo(map)
-      .bindPopup(popupHtml(r.name, r.note, fmtDist(km), driveTime(km, r._tf || 1), sub), { className: 'custom-popup' });
+      .bindPopup(popupHtml(r.name, r.note, fmtDist(km), driveTime(km, r._tf || 1), sub, r.meals, r.hours), { className: 'custom-popup' });
     const idx = allMarkers.length;
     m.on('click', () => selectMarker(idx));
     allMarkers.push(m);
@@ -619,11 +625,29 @@ function buildCity(cityKey) {
   buildPanel(cityKey);
 }
 
-function popupHtml(name, note, dist, time, sub) {
+const MEAL_META = {
+  breakfast: { emoji: '🌅', label: 'Breakfast', color: '#f4a261' },
+  lunch:     { emoji: '☀️',  label: 'Lunch',     color: '#52b788' },
+  dinner:    { emoji: '🌙', label: 'Dinner',     color: '#9b8ec4' },
+};
+
+function mealBadgesHtml(meals) {
+  if (!meals || !meals.length) return '';
+  return meals.map(m => {
+    const meta = MEAL_META[m];
+    return `<span style="padding:2px 8px;border-radius:10px;background:${meta.color}22;border:1px solid ${meta.color}55;color:${meta.color};font-size:11px;font-weight:600">${meta.label}</span>`;
+  }).join(' ');
+}
+
+function popupHtml(name, note, dist, time, sub, meals, hours) {
+  const mealRow = meals && meals.length ? `<div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap">${mealBadgesHtml(meals)}</div>` : '';
+  const hoursRow = hours ? `<div class="popup-row" style="margin-top:4px">🕐 <span style="color:#c0c0e0">${hours}</span></div>` : '';
   return `
     <div class="popup-title">${name}</div>
     <div class="popup-row">${sub}</div>
     ${note ? `<div class="popup-row" style="color:#a0a0c0;font-style:italic">${note}</div>` : ''}
+    ${mealRow}
+    ${hoursRow}
     ${dist ? `
       <div style="margin-top:8px;display:flex;gap:14px">
         <div class="popup-row">📏 <span class="val">${dist}</span></div>
@@ -674,6 +698,8 @@ function buildPanel(cityKey) {
       <div class="place-info">
         <div class="place-name">${r.name}${slow ? ' <span style="color:#f4a261;font-size:10px">🚦 slow</span>' : ''}${clear ? ' <span style="color:#52b788;font-size:10px">✅ clear</span>' : ''}</div>
         <div class="place-type" style="${r.michelin ? 'color:#f4d03f' : ''}">${sub}</div>
+        ${r.meals && r.meals.length ? `<div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:3px">${mealBadgesHtml(r.meals)}</div>` : ''}
+        ${r.hours ? `<div style="font-size:10px;color:#7a7a9a;margin-top:2px">🕐 ${r.hours}</div>` : ''}
       </div>
       <div class="place-meta">
         <div class="place-dist">${fmtDist(km)}</div>
