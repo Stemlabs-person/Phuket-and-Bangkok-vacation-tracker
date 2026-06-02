@@ -558,21 +558,6 @@
     .place-picker-dropdown div:hover { background: #2a2a5a; color: #fff; }
     .place-picker-dropdown div:last-child { border-bottom: none; }
 
-    #ai-schedule-btn {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      background: #6a3d9a;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-bottom: 16px;
-      transition: background 0.15s;
-    }
-    #ai-schedule-btn:hover { background: #7d4fb3; }
-    #ai-schedule-btn:disabled { background: #2a2a4a; color: #6060a0; cursor: default; }
   </style>
 </head>
 <body>
@@ -686,7 +671,6 @@
   <div id="planning-body">
     <!-- Schedule view -->
     <div id="plan-schedule">
-      <button id="ai-schedule-btn" onclick="generateAISchedule()">✨ Auto-generate schedule with AI</button>
       <div id="schedule-days"></div>
     </div>
     <!-- Notes view -->
@@ -1332,65 +1316,6 @@ document.getElementById('field-maps-url').addEventListener('input', function() {
   }
 });
 
-function getApiKey() {
-  let key = localStorage.getItem('geminiApiKey');
-  if (!key) {
-    key = prompt('Enter your Google Gemini API key (free at aistudio.google.com — stored locally):');
-    if (key) localStorage.setItem('geminiApiKey', key.trim());
-  }
-  return key ? key.trim() : null;
-}
-
-async function autoFillPlaceInfo(place, type) {
-  const apiKey = getApiKey();
-  if (!apiKey) return;
-
-  const city = currentCity === 'phuket' ? 'Phuket, Thailand' : 'Bangkok, Thailand';
-  const category = type === 'restaurant' ? `restaurant (cuisine: ${place.cuisine})` :
-                   type === 'casual'     ? `activity/casual place (type: ${place.type})` :
-                                           `tourist attraction (type: ${place.type})`;
-
-  const promptText = `You are helping build a travel guide for a vacation to ${city}.
-Write 3 things about this place called "${place.name}", a ${category}${place.note ? ` — note: "${place.note}"` : ''}:
-
-1. DESCRIPTION: A rich, evocative paragraph (5–8 sentences) describing what this place is like — the atmosphere, what makes it special, what to order or do, best time to visit. Write in second person as if guiding a traveller.
-2. OPENING_HOURS: The typical opening hours in a short format like "Daily 9am–10pm" or "Mon–Sat 11am–3pm, 6–10pm". If unknown, give a plausible estimate.
-3. TOP_REVIEW: A single fabricated but realistic 4–5 star review in the style of Google Reviews or TripAdvisor — include a name, star rating, and vivid detail. Format: "<review text>" — Firstname L., Google Reviews ⭐⭐⭐⭐⭐
-
-Respond in EXACTLY this format with no other text:
-DESCRIPTION: <text>
-OPENING_HOURS: <text>
-TOP_REVIEW: <text>`;
-
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] }),
-      }
-    );
-
-    if (!res.ok) throw new Error(`API error ${res.status}`);
-    const data = await res.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-    const descMatch   = text.match(/DESCRIPTION:\s*([\s\S]*?)(?=\nOPENING_HOURS:)/);
-    const hoursMatch  = text.match(/OPENING_HOURS:\s*(.+?)(?=\nTOP_REVIEW:|$)/);
-    const reviewMatch = text.match(/TOP_REVIEW:\s*([\s\S]*?)$/);
-
-    if (descMatch)   place.desc      = descMatch[1].trim();
-    if (hoursMatch)  place.hours     = hoursMatch[1].trim();
-    if (reviewMatch) place.topReview = reviewMatch[1].trim();
-
-    saveUserPlaces();
-    buildCity(currentCity);
-  } catch (err) {
-    console.error('Auto-fill failed:', err);
-    alert('Auto-fill error: ' + err.message);
-  }
-}
 
 function savePlace() {
   const name    = document.getElementById('field-name').value.trim();
@@ -1420,9 +1345,6 @@ function savePlace() {
   cancelAddPlace();
   buildCity(currentCity);
 
-  if (newPlace && placeType !== 'hotel') {
-    autoFillPlaceInfo(newPlace, placeType);
-  }
 }
 
 /* ── TRAFFIC REFRESH every 30s ── */
@@ -1615,71 +1537,6 @@ function showPlacePicker(e, city, inputEl) {
   }), 10);
 }
 
-async function generateAISchedule() {
-  const apiKey = getApiKey();
-  if (!apiKey) return;
-
-  const btn = document.getElementById('ai-schedule-btn');
-  btn.disabled = true;
-  btn.textContent = '⏳ Generating…';
-
-  const phuketPlaces = [
-    ...cities.phuket.restaurants.map(r => r.name),
-    ...cities.phuket.attractions.map(a => a.name),
-    ...cities.phuket.casuals.map(c => c.name),
-  ].join(', ');
-
-  const bangkokPlaces = [
-    ...cities.bangkok.restaurants.map(r => r.name),
-    ...cities.bangkok.attractions.map(a => a.name),
-    ...cities.bangkok.casuals.map(c => c.name),
-  ].join(', ');
-
-  const promptText = `Create a 7-day itinerary for Phuket and a 7-day itinerary for Bangkok for a vacation.
-
-Phuket places available: ${phuketPlaces}
-Bangkok places available: ${bangkokPlaces}
-
-Return ONLY a JSON object in this exact format, no other text:
-{
-  "phuket_1": {"Morning":"...","Lunch":"...","Afternoon":"...","Dinner":"...","Evening":"..."},
-  "phuket_2": {"Morning":"...","Lunch":"...","Afternoon":"...","Dinner":"...","Evening":"..."},
-  ...through phuket_7,
-  "bangkok_1": {"Morning":"...","Lunch":"...","Afternoon":"...","Dinner":"...","Evening":"..."},
-  ...through bangkok_7
-}
-
-Use the place names provided where relevant. Keep each slot brief (one place or activity).`;
-
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] }),
-      }
-    );
-    if (!res.ok) throw new Error(`API error ${res.status}`);
-    const data = await res.json();
-    let text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    text = text.replace(/```json|```/g, '').trim();
-    const schedule = JSON.parse(text);
-    savePlanningData(schedule);
-    buildSchedule();
-    // expand all days
-    document.querySelectorAll('.day-content').forEach(el => {
-      el.classList.remove('collapsed');
-      const toggle = el.previousSibling?.querySelector('.day-toggle');
-      if (toggle) toggle.textContent = '▼';
-    });
-  } catch(err) {
-    alert('AI schedule error: ' + err.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '✨ Auto-generate schedule with AI';
-  }
-}
 
 /* ── BOOT ── */
 buildCity('phuket');
