@@ -1399,11 +1399,18 @@ const DEFAULT_SCHEDULE = {
   bangkok_6: { '8am–10am': '✈️ Depart Bangkok 7:00 AM — already at airport, homebound!', '10am–12pm': 'In the air — homebound', '12pm–2pm': '', '2pm–4pm': '', '4pm–6pm': '', '6pm–8pm': '', '8pm–10pm': '' },
 };
 
+const SCHEDULE_VERSION = '3';
+
 function loadPlanningData() {
   try {
+    if (localStorage.getItem('scheduleVersion') !== SCHEDULE_VERSION) {
+      localStorage.removeItem('planningSchedule');
+      localStorage.setItem('scheduleVersion', SCHEDULE_VERSION);
+      savePlanningData(DEFAULT_SCHEDULE);
+      return DEFAULT_SCHEDULE;
+    }
     const s = localStorage.getItem('planningSchedule');
     if (s) return JSON.parse(s);
-    // pre-fill with default schedule on first load
     savePlanningData(DEFAULT_SCHEDULE);
     return DEFAULT_SCHEDULE;
   } catch(e) { return DEFAULT_SCHEDULE; }
