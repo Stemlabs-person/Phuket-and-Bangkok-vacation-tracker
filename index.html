@@ -1379,18 +1379,18 @@ let activePlanTab = 'schedule';
 let activePicker = null;
 
 const TRIP_DAYS = [
-  ...Array.from({length:7},(_,i)=>({city:'phuket', day:i+1, label:`Phuket — Day ${i+1}`})),
+  ...Array.from({length:5},(_,i)=>({city:'phuket', day:i+1, label:`Phuket — Day ${i+1}`})),
   ...Array.from({length:7},(_,i)=>({city:'bangkok', day:i+1, label:`Bangkok — Day ${i+1}`})),
 ];
 
 const SLOTS = ['8am–11am','11am–2pm','2pm–5pm','5pm–7pm','7pm–9pm'];
 
 const DEFAULT_SCHEDULE = {
-  phuket_1:  { '8am–11am': 'Surf House Phuket (Kamala) — wave pool & beginner surf lessons, perfect for the whole family', '11am–2pm': 'Lunch at Kamala Beach café, then head back to hotel for shower', '2pm–5pm': 'Hotel break — pool time & cool down', '5pm–7pm': 'Phuket Pickleball Club — warm-up family match on day one', '7pm–9pm': 'Tom Yum Goong Restaurant — famous fragrant tom yum soup in Phuket Town (clear or creamy version!)' },
+  phuket_1:  { '8am–11am': '✈️ Land at Phuket Airport 9:00 AM — airport pickup & transfer to hotel', '11am–2pm': 'Hotel check-in — unpack, freshen up, grab lunch near the hotel', '2pm–5pm': 'Hotel break — pool time & cool down after the flight', '5pm–7pm': 'Phuket Pickleball Club — warm-up family match on arrival evening', '7pm–9pm': 'Tom Yum Goong Restaurant — famous fragrant tom yum soup in Phuket Town (clear or creamy version!)' },
   phuket_2:  { '8am–11am': 'Surin Beach — surf board rental & wave riding, beginner friendly & beautiful beach', '11am–2pm': 'Tatonka — fruit smoothies, pancakes & fresh juice for lunch near hotel', '2pm–5pm': 'Hotel break — nap & relax by pool', '5pm–7pm': 'Phuket Pickleball Club — afternoon match', '7pm–9pm': 'Trisara PRU — Michelin farm-to-table dinner (spicy & mild options)' },
   phuket_3:  { '8am–11am': 'Phuket Elephant Sanctuary — feed, walk & watch elephants bathe in the river (book ahead!)', '11am–2pm': 'Roti Chaofa — sweet banana & condensed milk roti, then Mango Sticky Rice for dessert', '2pm–5pm': 'Hotel break — rest after the sanctuary morning', '5pm–7pm': 'Old Phuket Town — street art murals, shophouses & souvenir shopping', '7pm–9pm': 'Blue Elephant — Michelin royal Thai (spicy & mild dishes for everyone)' },
   phuket_4:  { '8am–11am': 'Surf House Phuket (Kamala) — second surf session, try the ocean lesson this time', '11am–2pm': 'Laguna Restaurant — relaxed poolside lunch back near hotel', '2pm–5pm': 'Hotel break — pool time & recharge', '5pm–7pm': 'Phuket Pickleball Club — competitive family doubles match', '7pm–9pm': 'Acqua Restaurant — pasta & fresh seafood with stunning cliff-top sea views' },
-  phuket_5:  { '8am–11am': 'Surin Beach — another surf session, getting better every time!', '11am–2pm': 'Khao Tom Dibuk — Michelin rice porridge, choose your toppings & spice level', '2pm–5pm': 'Hotel break — nap, pool, recharge', '5pm–7pm': 'Wat Chalong — beautiful Buddhist temple & golden pagoda', '7pm–9pm': 'Promthep Cape — stunning sunset views, then Chuan Chim for dinner (spicy & mild Southern Thai)' },
+  phuket_5:  { '8am–11am': 'Go Benz Rice Porridge — farewell Phuket breakfast, then final pool swim', '11am–2pm': 'Check out & transfer to airport — depart Phuket 2:00 PM ✈️', '2pm–5pm': '✈️ Phuket → Bangkok flight', '5pm–7pm': 'Arrive Bangkok — check in & freshen up', '7pm–9pm': 'Blue Elephant Bangkok — Michelin royal Thai welcome dinner (mild & spicy options)' },
   phuket_6:  { '8am–11am': 'Big Buddha — sunrise visit & panoramic views, then Bang Tao Beach Volleyball', '11am–2pm': 'Go Benz Rice Porridge — warm local breakfast, then hotel pool swim', '2pm–5pm': 'Oasis Spa Laguna — foot massage & body scrub, well deserved!', '5pm–7pm': 'Boat Avenue — browse shops, grab snacks & fresh coconuts', '7pm–9pm': 'Siam Supper Club — live music, great food & fun last Phuket night out' },
   phuket_7:  { '8am–11am': 'Phuket Pickleball Club — final Phuket match, then Croissant & Co for farewell pastries & juice', '11am–2pm': 'Roti Chaofa — one last sweet roti, then Mango Sticky Rice for dessert one final time', '2pm–5pm': 'Boat Avenue & Central Festival — last minute shopping & souvenirs', '5pm–7pm': 'Hotel break — pack bags for Bangkok', '7pm–9pm': 'Blue Elephant Phuket — farewell Michelin dinner to close out the week in style' },
   bangkok_1: { '8am–11am': 'Check in — Marriott Sukhumvit Park, settle in & explore Sukhumvit area', '11am–2pm': 'Terminal 21 Pier 21 food court — pad thai & fruit shakes, then Mango Sticky Rice nearby for dessert', '2pm–5pm': 'Hotel break — rest after travel', '5pm–7pm': 'Healthland Spa & Massage — relaxing Thai massage to recover from Phuket', '7pm–9pm': 'Blue Elephant Bangkok — Michelin royal Thai (mild & spicy options for everyone)' },
@@ -1452,7 +1452,7 @@ function buildSchedule() {
     if (city !== lastCity) {
       const ch = document.createElement('div');
       ch.className = 'schedule-city-header';
-      ch.textContent = city === 'phuket' ? '🏝 Phuket — Week 1' : '🏙 Bangkok — Week 2';
+      ch.textContent = city === 'phuket' ? '🏝 Phuket — 5 Days' : '🏙 Bangkok — Week 2';
       container.appendChild(ch);
       lastCity = city;
     }
